@@ -1,4 +1,4 @@
-/* $Id: queries2.c,v 2.88.2.1 2001-08-20 08:17:35 zacheiss Exp $
+/* $Id: queries2.c,v 2.88.2.2 2001-08-21 03:54:39 zacheiss Exp $
  *
  * This file defines the query dispatch table
  *
@@ -4806,7 +4806,7 @@ struct query Queries[] = {
     UPDATE,
     "s",
     SUBNET_TABLE,
-    "subnet SET name = UPPER('%s'), description = NVL('%s', CHR(0)), status = %d, saddr = %s, mask = %s, low = %s, high = %s, prefix = NVL('%s', CHR(0)), owner_type = '%s', owner_id = %d",
+    "subnet SET name = UPPER('%s'), description = NVL('%s', CHR(0)), status = %s, saddr = %s, mask = %s, low = %s, high = %s, prefix = NVL('%s', CHR(0)), owner_type = '%s', owner_id = %d",
     usnt_fields,
     10,
     "snet_id = %d",
