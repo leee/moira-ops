@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/letter.dc,v 1.5.1.1 1992-09-14 23:48:13 genoa Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/letter.dc,v 1.5.1.2 1992-09-14 23:51:53 genoa Exp $
  *
  * This generates confirmation letters to people who recently set
  * their secure instance passwords.
@@ -71,6 +71,10 @@ char **argv;
 
     init_letter();
 
+    /* The following is declarative, not executed,
+     * and so is dependent on where it is in the file,
+     * not in the order of execution of statements.
+     */
     EXEC SQL WHENEVER SQLERROR GOTO sqlerr;
 
     EXEC SQL SELECT secure INTO :lastrun FROM users WHERE users_id = 0;
