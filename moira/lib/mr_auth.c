@@ -1,4 +1,4 @@
-/* $Id: mr_auth.c,v 1.24.4.3 2002-08-19 17:42:45 zacheiss Exp $
+/* $Id: mr_auth.c,v 1.24.4.4 2002-08-19 18:23:50 zacheiss Exp $
  *
  * Handles the client side of the sending of authenticators to the moira server
  *
@@ -21,7 +21,7 @@
 krb5_context context = NULL;
 krb5_auth_context auth_con = NULL;
 
-RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/lib/mr_auth.c,v 1.24.4.3 2002-08-19 17:42:45 zacheiss Exp $");
+RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/lib/mr_auth.c,v 1.24.4.4 2002-08-19 18:23:50 zacheiss Exp $");
 
 /* Authenticate this client with the Moira server.  prog is the name of the
  * client program, and will be recorded in the database.
@@ -95,21 +95,20 @@ int mr_proxy(char *principal, char *orig_authtype)
 
 int mr_krb5_auth(char *prog)
 {
-  int status;
   mr_params params, reply;
   char host[BUFSIZ], *p;
   char *args[2];
   int argl[2];
   krb5_ccache ccache = NULL;
   krb5_data auth;
-  krb5_error_code problem;
+  krb5_error_code problem = 0;
 
   CHECK_CONNECTED;
 
   memset(&auth, 0, sizeof(auth));
 
-  if ((status = mr_host(host, sizeof(host) - 1)))
-    return status;
+  if ((problem = mr_host(host, sizeof(host) - 1)))
+    return problem;
 
   for (p = host; *p && *p != '.'; p++)
     {
@@ -119,9 +118,11 @@ int mr_krb5_auth(char *prog)
   *p = '\0';
 
   if (!context)
-    problem = krb5_init_context(&context);
-  if (problem)
-    goto out;
+    {
+      problem = krb5_init_context(&context);
+      if (problem)
+	goto out;
+    }
 
   problem = krb5_auth_con_init(context, &auth_con);
   if (problem)
@@ -145,8 +146,8 @@ int mr_krb5_auth(char *prog)
   params.mr_argv[1] = prog;
   params.mr_argl[1] = strlen(prog) + 1;
 
-  if ((status = mr_do_call(&params, &reply)) == MR_SUCCESS)
-    status = reply.u.mr_status;
+  if ((problem = mr_do_call(&params, &reply)) == MR_SUCCESS)
+    problem = reply.u.mr_status;
 
   mr_destroy_reply(reply);
 
@@ -158,6 +159,6 @@ int mr_krb5_auth(char *prog)
     krb5_auth_con_free(context, auth_con);
   auth_con = NULL;
 
-  return status;
+  return problem;
 }
       
