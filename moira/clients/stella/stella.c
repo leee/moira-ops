@@ -5,7 +5,7 @@
  *
  * Somewhat based on blanche
  *
- * Copyright (C) 2000 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2000, 2001 by the Massachusetts Institute of Technology.
  * For copying and distribution information, please see the file
  * <mit-copyright.h>.
  */
@@ -21,7 +21,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/clients/stella/stella.c,v 1.10.2.1 2001-08-21 05:49:20 zacheiss Exp $");
+#ifdef _WIN32
+typedef unsigned long in_addr_t;
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#endif
+
+RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/clients/stella/stella.c,v 1.10.2.2 2001-08-22 07:27:45 zacheiss Exp $");
 
 struct owner_type {
   int type;
@@ -51,7 +61,7 @@ struct string_list {
 /* flags from command line */
 int info_flag, update_flag, create_flag, delete_flag, list_map_flag;
 int update_alias_flag, update_map_flag, verbose, noauth;
-int list_container_flag, update_container_flag;
+int list_container_flag, update_container_flag, unformatted_flag;
 
 struct string_list *alias_add_queue, *alias_remove_queue;
 struct string_list *map_add_queue, *map_remove_queue;
@@ -63,11 +73,13 @@ char *newname, *address, *network, *h_status, *vendor, *model;
 char *os, *location, *contact, *billing_contact, *account_number;
 char *adm_cmt, *op_cmt;
 
+in_addr_t ipaddress;
 struct owner_type *owner;
 
 void usage(char **argv);
 int store_host_info(int argc, char **argv, void *hint);
 void show_host_info(char **argv);
+void show_host_info_unformatted(char **argv);
 int show_machine_in_cluster(int argc, char **argv, void *hint);
 int show_machine_in_container(int argc, char **argv, void *hint);
 struct owner_type *parse_member(char *s);
@@ -285,6 +297,8 @@ int main(int argc, char **argv)
 	  }
 	  else if (argis("lcn", "listcontainer"))
 	    list_container_flag++;
+	  else if (argis("u", "unformatted"))
+	    unformatted_flag++;
 	  else if (argis("n", "noauth"))
 	    noauth++;
 	  else if (argis("v", "verbose"))
@@ -327,6 +341,22 @@ int main(int argc, char **argv)
     }
   if (status)
     exit(2);
+
+  /* Perform the lookup by IP address if that's what we've been handed */
+  if ((ipaddress=inet_addr(hostname)) != -1) {
+    char *args[5];
+    char *argv[30];
+
+    args[1] = strdup(hostname);
+    args[0] = args[2] = args[3] = "*";
+    status = wrap_mr_query("get_host", 4, args, store_host_info, argv);
+
+    if (status) {
+      com_err(whoami, status, "while looking up IP address.");
+    } else {
+      hostname = argv[0];
+    }
+  }
 
   /* create if needed */
   if (create_flag)
@@ -656,7 +686,10 @@ int main(int argc, char **argv)
       com_err(whoami, status, "while getting host information");
       exit(1);
     }
-    show_host_info(argv);
+    if (unformatted_flag)
+      show_host_info_unformatted(argv);
+    else
+      show_host_info(argv);
   }
 
   /* list cluster mappings if needed */
@@ -755,6 +788,16 @@ int show_alias_info(int argc, char **argv, void *hint)
   return MR_CONT;
 }
 
+int show_alias_info_unformatted(int argc, char **argv, void *hint)
+{
+  if(!show_has_aliases++)
+    printf("Alias:            %s", argv[0]);
+  else
+    printf(", %s", argv[0]);
+
+  return MR_CONT;
+}
+
 static char *states[] = {
   "Reserved (0)",
   "Active (1)",
@@ -827,6 +870,45 @@ void show_host_info(char **argv)
   printf("\n");
   printf("Created  by %s on %s\n", argv[M_CREATOR], argv[M_CREATED]);
   printf("Last mod by %s at %s with %s.\n", argv[M_MODBY], argv[M_MODTIME], argv[M_MODWITH]);
+}
+
+void show_host_info_unformatted(char **argv)
+{
+  char *args[3];
+  struct mqelem *elem = NULL;
+  int stat;
+
+  printf("Machine:          %s\n", argv[M_NAME]);
+  args[0] = "*";
+  args[1] = argv[M_NAME];
+  show_has_aliases = 0;
+  stat = wrap_mr_query("get_hostalias", 2, args, show_alias_info_unformatted, 
+		       &elem);
+  if (stat && stat != MR_NO_MATCH)
+    com_err(whoami, stat, "while getting aliases");
+  else
+    printf("\n");
+  printf("Address:          %s\n", argv[M_ADDR]);
+  printf("Network:          %s\n", argv[M_SUBNET]);
+  printf("Owner Type:       %s\n", argv[M_OWNER_TYPE]);
+  printf("Owner:            %s\n", argv[M_OWNER_NAME]);
+  printf("Status:           %s\n", MacState(atoi(argv[M_STAT])));
+  printf("Changed:          %s\n", argv[M_STAT_CHNG]);
+  printf("Use data:         %s\n", argv[M_INUSE]);
+  printf("Vendor:           %s\n", argv[M_VENDOR]);
+  printf("Model:            %s\n", argv[M_MODEL]);
+  printf("OS:               %s\n", argv[M_OS]);
+  printf("Location:         %s\n", argv[M_LOC]);
+  printf("Contact:          %s\n", argv[M_CONTACT]);
+  printf("Billing Contact:  %s\n", argv[M_BILL_CONTACT]);
+  printf("Opt:              %s\n", argv[M_USE]);
+  printf("Adm cmt:          %s\n", argv[M_ACOMMENT]);
+  printf("Op cmt:           %s\n", argv[M_OCOMMENT]);
+  printf("Created by:       %s\n", argv[M_CREATOR]);
+  printf("Created on:       %s\n", argv[M_CREATED]);
+  printf("Last mod by:      %s\n", argv[M_MODBY]);
+  printf("Last mod on:      %s\n", argv[M_MODTIME]);
+  printf("Last mod with:    %s\n", argv[M_MODWITH]);
 }
 
 int show_machine_in_cluster(int argc, char **argv, void *hint)
