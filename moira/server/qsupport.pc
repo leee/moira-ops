@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v $
  *	$Author: danw $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v 2.5 1997-09-05 20:13:00 danw Exp $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v 2.5.2.1 1997-10-03 17:31:20 danw Exp $
  *
  *	Copyright (C) 1987 by the Massachusetts Institute of Technology
  *	For copying and distribution information, please see the file
@@ -10,7 +10,7 @@
  */
 
 #ifndef lint
-static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v 2.5 1997-09-05 20:13:00 danw Exp $";
+static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v 2.5.2.1 1997-10-03 17:31:20 danw Exp $";
 #endif lint
 
 #include <mit-copyright.h>
@@ -110,7 +110,7 @@ int get_list_info(q, aargv, cl, action, actarg)
      client *cl;
      int (*action)(), actarg;
 {
-    char *argv[13];
+    char *argv[13], *s, *d;
     EXEC SQL BEGIN DECLARE SECTION;
     char *name, acl_type[9], listname[33], active[5], public[5], hidden[5];
     char maillist[5], grouplist[5], gid_str[6], desc[256];
@@ -121,12 +121,23 @@ int get_list_info(q, aargv, cl, action, actarg)
     struct save_queue *sq, *sq_create();
 
     returned = rowcount = 0;
-    name = aargv[0];
-    convert_wildcards(name);
+
+    /* copy list name and fix wildcards */
+    name = malloc(2 * strlen(aargv[0]) + 1);
+    for (s = aargv[0], d = name; *s; s++, d++)
+	switch (*s) {
+	    case '*': *d = '%'; break;
+	    case '?': *d = '_'; break;
+	    case '%':
+	    case '_': *d++ = '*'; /* fall through */
+	    default:  *d = *s; break;
+	}
+    *d = '\0';
 
     sq = sq_create();
     EXEC SQL DECLARE csr102 CURSOR FOR SELECT list_id FROM list
       WHERE name LIKE :name ESCAPE '*';
+    free(name);
     if (dbms_errno)
 	return(mr_errcode);
     EXEC SQL OPEN csr102;

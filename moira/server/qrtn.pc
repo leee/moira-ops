@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qrtn.pc,v $
  *	$Author: danw $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qrtn.pc,v 2.4.2.1 1997-10-01 22:02:58 danw Exp $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qrtn.pc,v 2.4.2.2 1997-10-03 17:31:19 danw Exp $
  *
  *	Copyright (C) 1987, 1988 by the Massachusetts Institute of Technology
  *	For copying and distribution information, please see the file
@@ -10,7 +10,7 @@
  */
 
 #ifndef lint
-static char *rcsid_qrtn_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qrtn.pc,v 2.4.2.1 1997-10-01 22:02:58 danw Exp $";
+static char *rcsid_qrtn_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qrtn.pc,v 2.4.2.2 1997-10-03 17:31:19 danw Exp $";
 #endif lint
 
 #include <mit-copyright.h>
@@ -50,8 +50,8 @@ int do_append(struct query *q, char *argv[], char *pqual,
 	      int (*action)(), char *actarg);
 int do_delete(struct query *q, char *qual,
 	      int (*action)(), char *actarg);
-void build_sql_stmt(char *result_buf, char *cmd, char *targetlist,
-		    char *argv[], char *qual);
+char *build_sql_stmt(char *cmd, char *targetlist, char *argv[],
+		     int argc, char *qual, char *sort);
 
 /* from qvalidate.dc */
 int validate_fields(struct query *q, char *argv[], struct valobj *vo, int n);
@@ -149,8 +149,7 @@ int mr_process_query(cl, name, argc, argv_ro, action, actarg)
     register struct query *q;
     register int status;
     register struct validate *v;
-    char qual[256];
-    char *pqual;
+    char *qual = NULL;
     EXEC SQL BEGIN DECLARE SECTION; 
     char *table;
     EXEC SQL END DECLARE SECTION; 
@@ -200,21 +199,14 @@ int mr_process_query(cl, name, argc, argv_ro, action, actarg)
 	    if (status != MR_EXISTS) break;
 	}
 
-	/* build "where" clause if needed */
-	if (q->qual) {
-	    build_qual(q->qual, q->argc, Argv, qual); 
-	    pqual = qual;
-	} else {
-	    pqual = 0;
-	}
-
 	/* if there is a followup routine, then we must save the results */
 	/* of the first query for use by the followup routine */
 	/* if q->rvar = NULL, perform post_rtn only */
 	if (q->rvar) {
+	    if (q->qual) qual = build_qual(q->qual, q->argc, Argv);
 	    if (v && v->post_rtn) {
 		sq = sq_create();
-		status = do_retrieve(q, pqual, sq_save_args, (char *)sq);
+		status = do_retrieve(q, qual, sq_save_args, (char *)sq);
 		if (status != MR_SUCCESS) {
 		    sq_destroy(sq);
 		    break;
@@ -222,7 +214,7 @@ int mr_process_query(cl, name, argc, argv_ro, action, actarg)
 		status = (*v->post_rtn)(q, sq, v, action, actarg, cl);
 	    } else {
 		/* normal retrieve */
-		status = do_retrieve(q, pqual, action, actarg);
+		status = do_retrieve(q, qual, action, actarg);
 	    }
 	    if (status != MR_SUCCESS) break;
 	} else {
@@ -241,7 +233,7 @@ int mr_process_query(cl, name, argc, argv_ro, action, actarg)
 	/* build "where" clause and perform update */
 	/* if q->rvar = NULL, perform post_rtn only */
 	if (q->rvar) {
-	    build_qual(q->qual, q->argc, Argv, qual);
+	    qual = build_qual(q->qual, q->argc, Argv);
 	    incremental_before(q->rtable, qual, argv_ro);
 	    status = do_update(q, &Argv[q->argc], qual, action, actarg);
 	    incremental_after(q->rtable, qual, argv_ro);
@@ -267,26 +259,20 @@ int mr_process_query(cl, name, argc, argv_ro, action, actarg)
 	    if (status != MR_NO_MATCH) break;
 	}
 
-	/* build "where" clause if needed */
-	if (q->qual) {
-	    build_qual(q->qual, q->argc, Argv, qual);
-	    pqual = qual;
-	} else {
-	    pqual = 0;
-	}
-
 	/* perform the append */
 	/* if q->rvar = NULL, perform post_rtn only */
 	if (q->rvar) {
+	    if (q->qual) qual = build_qual(q->qual, q->argc, Argv);
 	    incremental_clear_before();
-	    status = do_append(q, &Argv[q->argc], pqual, action, actarg);
+	    status = do_append(q, &Argv[q->argc], qual, action, actarg);
 	    if (status != MR_SUCCESS) break;
 	    if (v && v->object_id) {
+		qual = realloc(qual, 128);
 		sprintf(qual, "%s.%s = %s",q->rvar, v->object_id, 
 			Argv[q->argc+q->vcnt]);
 		incremental_after(q->rtable, qual, argv_ro);
 	    } else
-	      incremental_after(q->rtable, pqual, argv_ro);
+	      incremental_after(q->rtable, qual, argv_ro);
 
 	    table = table_name[q->rtable];
 	    EXEC SQL UPDATE tblstats
@@ -308,7 +294,7 @@ int mr_process_query(cl, name, argc, argv_ro, action, actarg)
 	/* build "where" clause and perform delete */
 	/* if q->rvar = NULL, perform post_rtn only */
 	if (q->rvar) {
-	    build_qual(q->qual, q->argc, Argv, qual);
+	    qual = build_qual(q->qual, q->argc, Argv);
 	    table = table_name[q->rtable];
      	    incremental_before(q->rtable, qual, argv_ro);
 	    status = do_delete(q, qual, action, actarg);
@@ -364,48 +350,92 @@ out:
 	}
     }
     cache_commit(); /* commit following abort is safe */
+    if (qual) free(qual);
 
     if (status != MR_SUCCESS && log_flags & LOG_RES)
 	com_err(whoami, status, " (Query failed)");
     return(status);
 }
 
-int build_qual(fmt_buf, argc, argv, qual)
-     char *fmt_buf, *argv[], *qual;
+char *build_qual(fmt_buf, argc, argv)
+     char *fmt_buf, *argv[];
      int argc;
 {
-    char *res, *fmt;
+    char *res, *result_buf, *fmt, *arg, *like;
 
-    for(res=qual, fmt=fmt_buf; *fmt; fmt++) {
-	if(*fmt=='%') {
-	    if(*++fmt) {
-		switch(*fmt) {                       
-		  case '%':                              /* %% -> % */
-		    *res++ = *fmt;           
-		    break;
-		  case 's':
-		    if(*argv[0]) {
-		        char *p=*argv;
-			while(*p) {
-			    if(*p=='\'') *res++='\'';	/* double the ' */
-			    *res++=*p++;
+    result_buf = malloc(2*(strlen(fmt_buf) + argc*ARGLEN));
+
+    res = result_buf;
+    fmt = fmt_buf;
+
+    /* Look through the format for LIKE expressions and arguments.
+       Substitute in the arguments, and simplify the `LIKE's to `='s
+       where possible. */
+
+    while (*fmt) {
+	like = strstr(fmt, "LIKE");
+	arg = strchr(fmt, '%');
+
+	if (!like && !arg) {
+	    /* only plain text remains */
+	    strcpy(res, fmt);
+	    break;
+	} else if (!like || arg < like) {
+	    /* copy to arg, then substitute */
+	    strncpy(res, fmt, arg - fmt - 1);
+	    res += arg - fmt;
+	    if(*++arg) {
+		switch(*arg++) {                       
+		    case '%':
+			*res++ = '%';
+			break;
+		    case 's':
+			if(*argv[0]) {
+			    char *p = *argv;
+			    while(*p) {
+				if(*p == '\'') *res++ = '\'';
+				*res++ = *p++;
+			    }
 			}
-		    }
-		    argv++;
-		    break;
-		  case 'd':
-		    res+=sprintf(res,"%d",*(int *)*argv++);
-		    break;
-		  default:                               /* Swallow other %? pairs */
-		    break;
+			argv++;
+			break;
+		    case 'd':
+			res += sprintf(res, "%d", *(int *)*argv++);
+			break;
 		}
-	    } else break;
-	} else *res++ = *fmt;                            /* text -> result buffer */
+	    }
+	    fmt = arg;
+	    arg = strchr(fmt, '%');
+	} else {
+	    /* copy over up to the arg, then copy and convert the arg */
+	    char *p;
+	    int escape = 0;
+	    
+	    strncpy(res, fmt, arg - fmt - 1);
+	    res += arg - fmt;
+	    for (p = *argv++; *p; p++) {
+		switch (*p) {
+		    case '\'': *res++ = '\''; *res++ = '\''; break;
+		    case '*': *res++ = '%'; break;
+		    case '?': *res++ = '_'; break;
+		    case '%':
+		    case '_': *res++ = '*'; *res++ = *p; escape = 1; break;
+		    default: *res++ = *p;
+		}
+	    }
+	    if (escape) res += sprintf(res, " ESCAPE '*'");
+	    
+	    fmt += 2;
+	    arg = strchr(fmt, '%');
+	    like = strstr(fmt, "LIKE");
+	}
     }
-    *res='\0';
+
+    result_buf = realloc(result_buf, strlen(result_buf) + 1);
+    return result_buf;
 }
 
-/* Build arguement vector, verify query and arguments */
+/* Build argument vector, verify query and arguments */
 
 int privileged;
 
@@ -553,122 +583,42 @@ int do_retrieve(q, pqual, action, actarg)
      char *pqual, *actarg;
      int (*action)();
 {
-    build_sql_stmt(stmt_buf,"SELECT",q->tlist,NULL,pqual);
-    if(q->sort) {
-      strcat(stmt_buf," ORDER BY ");
-      strcat(stmt_buf,q->sort);
-    }
+    char *stmt;
+    int status;
 
-    return do_for_all_rows(stmt_buf, q->vcnt, action, (int)actarg);
+    stmt = build_sql_stmt("SELECT",q->tlist,NULL,0,pqual,q->sort);
+    status = do_for_all_rows(stmt_buf, q->vcnt, action, (int)actarg);
+    free(stmt);
+    return status;
 }
 
-char *sqlstrstr(str, pat)
-     char *str, *pat;
+char *build_sql_stmt(cmd, targetlist, argv, argc, qual, sort)
+     char *cmd, *targetlist, *argv[], *qual, *sort;
+     int argc;
 {
-    register char *p=pat;
-    
-    do {
-	if(*str=='\'') {    /* Skip over single-quote delimited substrings */ 
-	    while(*++str && (*str!='\'')) 
-		; 
-	    continue;
-	}
-	if(*str==*p) {
-	    register char *s;
-	    s=str; 
-	    while(*++p && (*++s==*p))
-		; 
-	    if(*p) p=pat;  /* failed */
-	}
-    } while(*p && *++str);
-
-    if(!*str) str=NULL;
-    return(str);
-}
-
-void optimize_sql_stmt(buf)
-     char *buf;
-{
-    char *point=buf, *pat, *eopat, *esc1, *esc2, *csr;
-
-    for(point=buf; point=sqlstrstr(point,"LIKE"); point++)  {
-	/* Now pointing to string "LIKE" */
-
-	/* Look at next word */
-	for(pat=point+4; *pat==' '; pat++) ;
-
-	/* Is it a single-quote delimited string? */
-	if(*pat!='\'') continue;
-
-	/* look for "escape" clause - save escape character */
-	/* 1. Find end of pattern */
-	for(eopat=pat+1; 1; eopat++) {
-	    if(*eopat=='\'') {
-		if(eopat[1]=='\'')  /* single-quote is self-escaping */
-		    eopat++;
-		else
-		    break;
-	    }
-	}
-
-	/* 2. Look at next word */
-	for(esc1=eopat; *++esc1==' ';) ;
-
-	/* 3. esc1=0 if not "ESCAPE '?'", where the ? may be any character. */
-	if(strncmp(esc1,"ESCAPE",6)) esc1=NULL;
-
-	if(esc1) {
-	    for(esc2=esc1+6; *esc2==' '; esc2++) ;
-	    
-	    if(*esc2++!='\'') continue; /* Bad SQL syntax. Skip. */
-	    /* esc2 now points at the escape character itself */
-	    if(esc2[1]!='\'') continue; /* Weird escape string. Skip. */
-	} else {
-	    esc2="\\";
-	}
-
-	/* Is pattern free from special characters? */
-	for(csr=pat; csr<eopat; csr++) 
-	    if((*csr=='%') || (*csr=='_') || (*csr==*esc2)) break;
-	if(csr!=eopat) continue; /* Uses pattern matching. Skip. */
-
-	/* Optimize the query statement */
-	/* 1. Change "LIKE" to " =  " */
-	memcpy(point," =  ",4);
-	
-	/* 2. Change "ESCAPE" to "      " */
-	if(esc1) {
-	    memset(esc1,' ',6);
-	    /* 3. Change  "'*'" to "   " */
-	    /*    (Changes '''' to "    ") */
-	    if(esc2) memset(esc2-1,' ',(*esc2=='\'')?4:3); 
-	}
-    }
-}
-
-void build_sql_stmt(result_buf, cmd, targetlist, argv, qual)
-     char *result_buf, *cmd, *targetlist, *argv[], *qual;
-{
-    char fmt_buf[MR_STMTBUF_LEN];
+    char *result_buf;
+    int len;
     register char *res, *fmt;
 
-    if(qual)
-      sprintf(fmt_buf,"%s %s WHERE %s",cmd,targetlist,qual);
-    else
-      sprintf(fmt_buf,"%s %s",cmd,targetlist);
+    len = strlen(cmd) + strlen(targetlist) + argc*ARGLEN + 3;
+    if (qual) len += strlen(qual) + 6;
+    if (sort) len += strlen(sort) + 10;
+    result_buf = malloc(len);
 
-    for(res=result_buf, fmt=fmt_buf; *fmt; fmt++) {
+    sprintf(result_buf, "%s ", cmd);
+
+    for(res=strchr(result_buf, '\0'), fmt=targetlist; *fmt; fmt++) {
 	if(*fmt=='%') {
 	    if(*++fmt) {
 		switch(*fmt) {                       
-		  case '%':                              /* %% -> % */
+		  case '%':
 		    *res++ = *fmt;           
 		    break;
 		  case 's':
 		    if(*argv[0]) {
 		        char *p=*argv;
 			while(*p) {
-			    if(*p=='\'') *res++='\'';	/* double the ' */
+			    if(*p=='\'') *res++='\'';
 			    *res++=*p++;
 			}
 		    }
@@ -677,15 +627,23 @@ void build_sql_stmt(result_buf, cmd, targetlist, argv, qual)
 		  case 'd':
 		    res+=sprintf(res,"%d",*(int *)*argv++);
 		    break;
-		  default:                               /* Swallow other %? pairs */
+		  default:
 		    break;
 		}
 	    } else break;
-	} else *res++ = *fmt;                            /* text -> result buffer */
+	} else *res++ = *fmt;
     }
     *res='\0';
 
-    optimize_sql_stmt(result_buf);
+    if (qual)
+	res += sprintf(res, " WHERE %s", qual);
+
+    if(sort)
+	res += sprintf(res, " ORDER BY %s", sort);
+
+    result_buf = realloc(result_buf, strlen(result_buf));
+
+    return result_buf;
 }
 
 int do_update(q, argv, qual, action, actarg)
@@ -693,8 +651,13 @@ int do_update(q, argv, qual, action, actarg)
      char *argv[], *qual, *actarg;
      int (*action)();
 {
-    build_sql_stmt(stmt_buf,"UPDATE",q->tlist,argv,qual);
-    EXEC SQL EXECUTE IMMEDIATE :stmt_buf;
+    EXEC SQL BEGIN DECLARE SECTION;
+    char *stmt;
+    EXEC SQL END DECLARE SECTION;
+
+    stmt = build_sql_stmt("UPDATE",q->tlist,argv,q->vcnt,qual,NULL);
+    EXEC SQL EXECUTE IMMEDIATE :stmt;
+    free(stmt);
     if (mr_errcode) return(mr_errcode);
     return(MR_SUCCESS);
 }
@@ -704,8 +667,13 @@ int do_append(q, argv, pqual, action, actarg)
      char *argv[], *pqual, *actarg;
      int (*action)();
 {
-    build_sql_stmt(stmt_buf,"INSERT",q->tlist,argv,pqual);
-    EXEC SQL EXECUTE IMMEDIATE :stmt_buf;
+    EXEC SQL BEGIN DECLARE SECTION;
+    char *stmt;
+    EXEC SQL END DECLARE SECTION;
+
+    stmt = build_sql_stmt("INSERT",q->tlist,argv,q->vcnt,pqual,NULL);
+    EXEC SQL EXECUTE IMMEDIATE :stmt;
+    free(stmt);
     if (mr_errcode) return(mr_errcode);
     return(MR_SUCCESS);
 }

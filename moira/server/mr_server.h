@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/mr_server.h,v $
  *	$Author: danw $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/mr_server.h,v 1.29 1997-09-05 19:15:04 danw Exp $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/mr_server.h,v 1.29.2.1 1997-10-03 17:31:18 danw Exp $
  *
  *	Copyright (C) 1987 by the Massachusetts Institute of Technology
  *
@@ -161,7 +161,7 @@ void sanity_check_queries(void);
 int set_krb_mapping(char *name, char *login, int ok, int *kid, int *uid);
 int find_member(char *list_type, int list_id, client *cl);
 int do_for_all_rows(char *query, int count, int (*action)(), int actarg);
-int build_qual(char *fmt, int argc, char *argv[], char *qual);
+char *build_qual(char *fmt, int argc, char *argv[]);
 
 
 /* prototyoes from qsupport.dc */
@@ -170,7 +170,6 @@ int set_pop_usage(int id, int cnt);
 /* prototypes from qvalidate.dc */
 void sanity_check_database(void);
 int add_string(char *name);
-int convert_wildcards(char *arg);
 
 /* prototypes from mr_main.c */
 void clist_delete(client *cp);

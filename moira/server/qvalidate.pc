@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v $
  *	$Author: danw $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.3 1997-10-02 00:24:26 danw Exp $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.4 1997-10-03 17:31:24 danw Exp $
  *
  *	Copyright (C) 1987 by the Massachusetts Institute of Technology
  *	For copying and distribution information, please see the file
@@ -10,7 +10,7 @@
  */
 
 #ifndef lint
-static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.3 1997-10-02 00:24:26 danw Exp $";
+static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.4 1997-10-03 17:31:24 danw Exp $";
 #endif lint
 
 #include <mit-copyright.h>
@@ -38,7 +38,6 @@ int validate_type(char *argv[], struct valobj *vo);
 int validate_typedata(struct query *, char *argv[], struct valobj *vo);
 int validate_len(char *argv[], struct valobj *vo);
 int validate_num(char *argv[], struct valobj *vo);
-int convert_wildcards_uppercase(char *arg);
 
 extern SQLDA *sqlald(int,int,int);
 
@@ -51,13 +50,11 @@ int validate_row(q, argv, v)
     char *argv[];
     register struct validate *v;
 {
-    EXEC SQL BEGIN DECLARE SECTION;
-    char qual[128];
+    char *qual;
     int rowcount;
-    EXEC SQL END DECLARE SECTION;
 
     /* build where clause */
-    build_qual(v->qual, v->argc, argv, qual);
+    qual = build_qual(v->qual, v->argc, argv);
 
     if (log_flags & LOG_VALID)
 	/* tell the logfile what we're doing */
@@ -66,6 +63,7 @@ int validate_row(q, argv, v)
     /* look for the record */
     sprintf(stmt_buf,"SELECT COUNT (*) FROM %s WHERE %s",
 	    table_name[q->rtable],qual);
+    free(qual);
     dosql(sqlbuffer);
     if (dbms_errno) return(mr_errcode);
 
@@ -137,15 +135,6 @@ int validate_fields(q, argv, vo, n)
 	      com_err(whoami, 0, "validating number: %s", argv[vo->index]);
 	    status = validate_num(argv, vo);
 	    break;
-
-        case V_WILD:
-	    status = convert_wildcards(argv[vo->index]);
-	    break;
-
-	case V_UPWILD:
-	    status = convert_wildcards_uppercase(argv[vo->index]);
-	    break;
-
 	}
 
 	if (status != MR_EXISTS) return(status);
@@ -518,60 +507,6 @@ SQLDA *mr_alloc_sqlda()
 
     return it;
 }
-
-
-/* Convert normal Unix-style wildcards to SQL voodoo */
-int convert_wildcards(arg)
-    char *arg;
-{
-    static char buffer[ARGLEN];
-    register char *s, *d;
-
-    for(d=buffer,s=arg;*s;s++) {
-	switch(*s) {
-	  case '*': *d++='%'; *d++='%'; break;
-	  case '?': *d++='_'; break;
-	  case '_': *d++='*'; *d++ = *s; break;
-	  case '%': *d++='*'; *d++='%'; *d++='%'; break;
-	  default: *d++ = *s; break;
-	}
-    }
-    *d='\0';
-
-    /* Copy back into argv */
-    strcpy(arg,buffer);
-
-    return(MR_EXISTS);
-}
-
-/* This version includes uppercase conversion, for things like gmac.
- * This is necessary because "LIKE" doesn't work with "uppercase()".
- * Including it in a wildcard routine saves making two passes over
- * the argument string.
- */
-int convert_wildcards_uppercase(arg)
-    char *arg;
-{
-    static char buffer[ARGLEN];
-    register char *s, *d;
-
-    for(d=buffer,s=arg;*s;s++) {
-	switch(*s) {
-	  case '*': *d++='%'; *d++='%'; break;
-	  case '?': *d++='_'; break;
-	  case '_': *d++='*'; *d++ = *s; break;
-	  case '%': *d++='*'; *d++='%'; *d++='%'; break;
-	  default: *d++=toupper(*s); break;       /* This is the only diff. */
-	}
-    }
-    *d='\0';
-
-    /* Copy back into argv */
-    strcpy(arg,buffer);
-
-    return(MR_EXISTS);
-}
-
 
 /*  Adds a string to the string table.  Returns the id number.
  * 
