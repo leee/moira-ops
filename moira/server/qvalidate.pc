@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v $
  *	$Author: danw $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.2 1997-10-01 22:30:29 danw Exp $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.3 1997-10-02 00:24:26 danw Exp $
  *
  *	Copyright (C) 1987 by the Massachusetts Institute of Technology
  *	For copying and distribution information, please see the file
@@ -10,7 +10,7 @@
  */
 
 #ifndef lint
-static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.2 1997-10-01 22:30:29 danw Exp $";
+static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.3 1997-10-02 00:24:26 danw Exp $";
 #endif lint
 
 #include <mit-copyright.h>
@@ -38,8 +38,6 @@ int validate_type(char *argv[], struct valobj *vo);
 int validate_typedata(struct query *, char *argv[], struct valobj *vo);
 int validate_len(char *argv[], struct valobj *vo);
 int validate_num(char *argv[], struct valobj *vo);
-int lock_table(struct valobj *vo);
-int readlock_table(struct valobj *vo);
 int convert_wildcards_uppercase(char *arg);
 
 extern SQLDA *sqlald(int,int,int);
@@ -101,14 +99,6 @@ int validate_fields(q, argv, vo, n)
 	    status = validate_id(q, argv, vo);
 	    break;
 
-	    /*
-	case V_DATE:
-	    if (log_flags & LOG_VALID)
-		com_err(whoami, 0, "validating date: %s", argv[vo->index]);
-	    status = validate_date(argv, vo);
-	    break;
-	    */
-
 	case V_TYPE:
 	    if (log_flags & LOG_VALID)
 		com_err(whoami, 0, "validating %s type: %s",
@@ -147,14 +137,6 @@ int validate_fields(q, argv, vo, n)
 	      com_err(whoami, 0, "validating number: %s", argv[vo->index]);
 	    status = validate_num(argv, vo);
 	    break;
-
-	case V_LOCK:
-	    status = lock_table(vo);
-	    break;
-
-        case V_RLOCK:
-            status = readlock_table(vo);
-            break;
 
         case V_WILD:
 	    status = convert_wildcards(argv[vo->index]);
@@ -299,24 +281,6 @@ int validate_name(argv, vo)
     if (dbms_errno) return(mr_errcode);
     return ((atoi(sqlbuffer[0]) == 1) ? MR_EXISTS : vo->error);
 }
-
-/*
-validate_date(argv, vo)
-    char *argv[];
-    struct valobj *vo;
-{
-    EXEC SQL BEGIN DECLARE SECTION;
-    char *idate;
-    double dd;
-    int errorno;
-    EXEC SQL END DECLARE SECTION;
-
-    idate = argv[vo->index];
-    EXEC SQL SELECT interval('years',date(:idate)-date('today')) INTO :dd;
-    if (sqlca.sqlcode != 0 || dd > 5.0) return(MR_DATE);
-    return(MR_EXISTS);
-}
-*/
 
 int validate_rename(argv, vo)
      char *argv[];
@@ -494,46 +458,6 @@ int validate_len(argv, vo)
       argv[vo->index][len]='\0'; /* truncate */
 
     return MR_EXISTS;
-}
-
-/* Lock the table named by the validation object */
-
-int lock_table(vo)
-     struct valobj *vo;
-{
-#ifdef DO_LOCKING
-    sprintf(stmt_buf, "LOCK TABLE %s IN EXCLUSIVE MODE", table_name[vo->table]);
-    EXEC SQL EXECUTE IMMEDIATE :stmt_buf;
-    if (dbms_errno) 
-        return(mr_errcode);
-    else
-#endif
-      return(MR_EXISTS);
-}
-
-/*
- * Get a read lock on the table by accessing the magic lock
- * record.  Certain tables are constructed so that they contain
- * an id field whose value is zero and a modtime field.  We 
- * manipulate the modtime field of the id 0 record to effect 
- * locking of the table
- */
-
-int readlock_table(vo)
-    struct valobj *vo;
-{
-#ifdef DO_LOCKING
-    sprintf(stmt_buf, "LOCK TABLE %s IN SHARE MODE", table_name[vo->table]);
-    EXEC SQL EXECUTE IMMEDIATE :stmt_buf;
-
-    if (dbms_errno)
-        return(mr_errcode);
-    if (sqlca.sqlcode)
-        return(vo->error);
-#endif
-    return(MR_EXISTS);  /* validate_fields expects us to return
-                           * this value if everything went okay
-                           */
 }
 
 /* Make sure the data is numeric */
