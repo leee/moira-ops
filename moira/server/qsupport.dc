@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.dc,v $
  *	$Author: genoa $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.dc,v 2.8.1.1 1992-08-25 02:27:07 genoa Exp $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.dc,v 2.8.1.2 1992-08-26 01:21:15 genoa Exp $
  *
  *	Copyright (C) 1987 by the Massachusetts Institute of Technology
  *	For copying and distribution information, please see the file
@@ -10,7 +10,7 @@
  */
 
 #ifndef lint
-static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.dc,v 2.8.1.1 1992-08-25 02:27:07 genoa Exp $";
+static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.dc,v 2.8.1.2 1992-08-26 01:21:15 genoa Exp $";
 #endif lint
 
 #include <mit-copyright.h>
@@ -1513,11 +1513,12 @@ followup_ausr(q, argv, cl)
     who = cl->client_id;
     entity = cl->entity;
 
-    /* create finger entry, pobox & set modtime on user */
+    /* create finger entry & pobox, set modtime on user, and update search fields */
 #ifdef GDSS
     EXEC SQL REPEATED UPDATE users
       SET modtime='now', modby=:who, modwith = :entity,
           fullname = :fullname, affiliation = type,
+          searchfirst = UPPERCASE(first), searchlast = UPPERCASE(last),
           signature = :rawsig, sigdate = :timestamp, sigwho = :sigwho,
           fmodtime='now', fmodby = :who, fmodwith = :entity,
           potype='NONE', pmodtime='now', pmodby = :who, pmodwith = :entity
@@ -1526,6 +1527,7 @@ followup_ausr(q, argv, cl)
     EXEC SQL REPEATED UPDATE users
       SET modtime='now', modby=:who, modwith = :entity,
           fullname = :fullname, affiliation = type,
+          searchfirst = UPPERCASE(first), searchlast = UPPERCASE(last),
           fmodtime='now', fmodby = :who, fmodwith = :entity,
           potype='NONE', pmodtime='now', pmodby = :who, pmodwith = :entity
       WHERE login = :login;
@@ -1603,14 +1605,16 @@ followup_uuac(q, argv, cl)
     }
 #endif /* GDSS */
  
-    /* create finger entry, pobox & set modtime on user */
+    /* set modtime on user and update search fields */
 
 #ifdef GDSS
     EXEC SQL REPEATED UPDATE users SET modtime='now', modby = :who, modwith = :entity,
-        signature = :rawsig, sigdate = :timestamp, sigwho = :sigwho
+        signature = :rawsig, sigdate = :timestamp, sigwho = :sigwho,
+        searchfirst = UPPERCASE(first), searchlast = UPPERCASE(last)
       WHERE users_id = :id;
 #else /* GDSS */
-    EXEC SQL REPEATED UPDATE users SET modtime='now', modby = :who, modwith = :entity
+    EXEC SQL REPEATED UPDATE users SET modtime='now', modby = :who, modwith = :entity,
+        searchfirst = UPPERCASE(first), searchlast = UPPERCASE(last)
       WHERE users_id = :id;
 #endif /* GDSS */
     return(MR_SUCCESS);

@@ -1,6 +1,6 @@
 /* This file defines the query dispatch table for version 2 of the protocol
  *
- * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.9.1.1 1992-08-25 02:56:46 genoa Exp $
+ * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.9.1.2 1992-08-26 01:21:15 genoa Exp $
  *
  * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
  * For copying and distribution information, please see the file
@@ -174,6 +174,13 @@ static struct valobj VOwild01sort01[] = {
   {V_SORT, 1}, 
 };
 
+static struct valobj VOupwild01sort01[] = {
+  {V_UPWILD, 0},
+  {V_UPWILD, 1},
+  {V_SORT, 0},
+  {V_SORT, 1}, 
+};
+
 static struct valobj VOwild012sort0[] = {  /* get_alias */
   {V_WILD, 0},
   {V_WILD, 1},
@@ -291,6 +298,18 @@ static struct validate VDupwildsortf = {
     followup_fix_modby,
 };
 
+static struct validate VDupwild2sortf = { 
+    VOupwild01sort01,
+    4,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    followup_fix_modby,
+};
+
 
 
 /* Query data */
@@ -373,10 +392,10 @@ static char *gubn_fields[] = {
   MIT_ID, CLASS, MOD1, MOD2, MOD3,
 };
 
-static struct validate gubn_validate =
+static struct validate gubn_validate = /* Q_GUBN, Q_GUAN */
 {
-    VOwild01sort0,
-    3,
+    VOupwild01sort01,
+    4,
     0,
     0,
     0,
@@ -500,7 +519,7 @@ static struct validate uusr_validate = {
   USERS_ID,
   0,
   setup_ausr,
-  set_modtime_by_id,
+  followup_uuac,
 };
 
 static char *uush_fields[] = {
@@ -2288,9 +2307,9 @@ struct query Queries2[] = {
       "CHAR(u.login), CHAR(u.uid), u.shell, CHAR(u.last), CHAR(u.first), u.middle, CHAR(u.status), CHAR(u.clearid), u.type, str.string, CHAR(u.signature), CHAR(u.secure), CHAR(u.modtime), CHAR(u.modby), u.modwith FROM users u, strings str",
       guan_fields,
       15,
-      "u.first LIKE '%s' ESCAPE '*' AND u.last LIKE '%s' ESCAPE '*' AND u.users_id != 0 and u.comment = str.string_id",
+      "u.searchfirst LIKE '%s' ESCAPE '*' AND u.searchlast LIKE '%s' ESCAPE '*' AND u.users_id != 0 and u.comment = str.string_id",
       2,
-      &VDwild2sortf,
+      &gubn_validate,
   },
  
   {
@@ -2363,7 +2382,7 @@ struct query Queries2[] = {
     "CHAR(login), CHAR(uid), shell, CHAR(last), CHAR(first), middle, CHAR(status), CHAR(clearid), type, CHAR(modtime), CHAR(modby), modwith FROM users",
     gubn_fields,
     12,
-    "first LIKE '%s' ESCAPE '*' AND last LIKE '%s' ESCAPE '*' AND users_id != 0",
+    "searchfirst LIKE '%s' ESCAPE '*' AND searchlast LIKE '%s' ESCAPE '*' AND users_id != 0",
     2,
     &gubn_validate,
   },
