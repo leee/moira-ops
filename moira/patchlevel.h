@@ -1,2 +1,0 @@
-#define MOIRA_VERSION 4.0
-#define PATCHLEVEL 0
