@@ -1,4 +1,4 @@
-/* $Id: moira_site.h,v 1.39.2.1 2001-08-20 08:13:11 zacheiss Exp $
+/* $Id: moira_site.h,v 1.39.2.2 2001-08-21 05:50:16 zacheiss Exp $
  *
  * This file contains all definitions that allow easy access to
  * elements returned by most of the @i[Moira] queries.  It also defines
@@ -341,6 +341,13 @@
 #define SN_MODBY	11
 #define SN_MODWITH	12
 #define SN_END		13
+
+/* Subnet statuses */
+#define SNET_STATUS_RESERVED        0
+#define SNET_STATUS_BILLABLE        1
+#define SNET_STATUS_PRIVATE         2
+#define SNET_STATUS_RESNET          3
+#define SNET_STATUS_INFRASTRUCTURE  4
 
 /* User Information queries, v3 */
 
