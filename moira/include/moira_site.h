@@ -1,4 +1,4 @@
-/* $Id: moira_site.h,v 1.39.2.2 2001-08-21 05:50:16 zacheiss Exp $
+/* $Id: moira_site.h,v 1.39.2.3 2001-08-22 08:06:07 zacheiss Exp $
  *
  * This file contains all definitions that allow easy access to
  * elements returned by most of the @i[Moira] queries.  It also defines
@@ -330,17 +330,19 @@
 #define SN_NAME		0
 #define SN_DESC		1
 #define SN_STATUS       2
-#define SN_ADDRESS	3
-#define SN_MASK		4
-#define SN_LOW		5
-#define SN_HIGH		6
-#define SN_PREFIX	7
-#define SN_ACE_TYPE	8
-#define SN_ACE_NAME	9
-#define SN_MODTIME	10
-#define SN_MODBY	11
-#define SN_MODWITH	12
-#define SN_END		13
+#define SN_CONTACT      3
+#define SN_ACCT_NUMBER  4
+#define SN_ADDRESS	5
+#define SN_MASK		6
+#define SN_LOW		7
+#define SN_HIGH		8
+#define SN_PREFIX	9
+#define SN_ACE_TYPE	10
+#define SN_ACE_NAME	11
+#define SN_MODTIME	12
+#define SN_MODBY	13
+#define SN_MODWITH	14
+#define SN_END		15
 
 /* Subnet statuses */
 #define SNET_STATUS_RESERVED        0
