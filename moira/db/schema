@@ -4,8 +4,8 @@ create table users
 	users_id	INTEGER 	NOT NULL WITH DEFAULT,
 	uid		SMALLINT 	NOT NULL WITH DEFAULT,
 	shell		CHAR(32) 	NOT NULL WITH DEFAULT,
-	last		VARCHAR(16) 	NOT NULL WITH DEFAULT,
-	first		VARCHAR(16) 	NOT NULL WITH DEFAULT,
+	last		CHAR(16) 	NOT NULL WITH DEFAULT,
+	first		CHAR(16) 	NOT NULL WITH DEFAULT,
 	middle		CHAR(16) 	NOT NULL WITH DEFAULT,
 	status		SMALLINT 	NOT NULL WITH DEFAULT,
 	clearid		VARCHAR(16) 	NOT NULL WITH DEFAULT,
@@ -42,7 +42,9 @@ create table users
 	sigwho       	INTEGER		NOT NULL WITH DEFAULT,
 	signature    	VARCHAR(68)	NOT NULL WITH DEFAULT,
 	secure       	INTEGER		NOT NULL WITH DEFAULT,       
-	flag         	INTEGER1	NOT NULL WITH DEFAULT
+	flag         	INTEGER1	NOT NULL WITH DEFAULT,
+	searchlast	VARCHAR(16) 	NOT NULL WITH DEFAULT,
+	searchfirst	VARCHAR(16) 	NOT NULL WITH DEFAULT
 );
 create table krbmap
 (
@@ -60,7 +62,8 @@ create table machine
 );
 create table cluster
 (
-	name		VARCHAR(32) 	NOT NULL WITH DEFAULT,
+	name		CHAR(32) 	NOT NULL WITH DEFAULT,
+	searchname	VARCHAR(32) 	NOT NULL WITH DEFAULT,
 	clu_id		INTEGER 	NOT NULL WITH DEFAULT,
 	description	CHAR(32) 	NOT NULL WITH DEFAULT,
 	location	CHAR(64) 	NOT NULL WITH DEFAULT,
@@ -81,7 +84,8 @@ create table svc
 );
 create table list
 (
-	name		VARCHAR(32) 	NOT NULL WITH DEFAULT,
+	name		CHAR(32) 	NOT NULL WITH DEFAULT,
+	searchname	VARCHAR(32)	NOT NULL WITH DEFAULT,
 	list_id		INTEGER 	NOT NULL WITH DEFAULT,
 	active		INTEGER1 	NOT NULL WITH DEFAULT,
 	publicflg	INTEGER1 	NOT NULL WITH DEFAULT,
@@ -106,7 +110,8 @@ create table imembers
 );
 create table servers 
 (
-	name		VARCHAR(16) 	NOT NULL WITH DEFAULT,
+	name		CHAR(16)	NOT NULL WITH DEFAULT,
+	searchname	VARCHAR(16) 	NOT NULL WITH DEFAULT,
 	update_int	INTEGER 	NOT NULL WITH DEFAULT,
 	target_file	CHAR(64) 	NOT NULL WITH DEFAULT,
 	script		CHAR(128) 	NOT NULL WITH DEFAULT,
@@ -125,7 +130,8 @@ create table servers
 );
 create table serverhosts 
 (
-	service		VARCHAR(16) 	NOT NULL WITH DEFAULT,
+	service		CHAR(16)	NOT NULL WITH DEFAULT,
+	searchservice	VARCHAR(16) 	NOT NULL WITH DEFAULT,
 	mach_id		INTEGER 	NOT NULL WITH DEFAULT,
 	success		INTEGER1 	NOT NULL WITH DEFAULT,
 	enable		INTEGER1 	NOT NULL WITH DEFAULT,
@@ -146,7 +152,8 @@ create table filesys
 (
 	filsys_id	INTEGER 	NOT NULL WITH DEFAULT,
 	phys_id		INTEGER 	NOT NULL WITH DEFAULT,
-	label		VARCHAR(32) 	NOT NULL WITH DEFAULT,
+	label		CHAR(32)	NOT NULL WITH DEFAULT,
+	searchlabel	VARCHAR(32) 	NOT NULL WITH DEFAULT,
 	fs_order	INTEGER2	NOT NULL WITH DEFAULT,
 	type		CHAR(8) 	NOT NULL WITH DEFAULT,
 	mach_id		INTEGER 	NOT NULL WITH DEFAULT,
@@ -223,7 +230,8 @@ create table strings
 );
 create table services 
 (
-	name		VARCHAR(16) 	NOT NULL WITH DEFAULT,
+	name		CHAR(16)	NOT NULL WITH DEFAULT,
+	searchname	VARCHAR(16) 	NOT NULL WITH DEFAULT,
 	protocol	CHAR(8) 	NOT NULL WITH DEFAULT,
 	port		SMALLINT 	NOT NULL WITH DEFAULT,
 	description	CHAR(64) 	NOT NULL WITH DEFAULT,
@@ -233,7 +241,8 @@ create table services
 );
 create table printcap 
 (
-	name		VARCHAR(16) 	NOT NULL WITH DEFAULT,
+	name		CHAR(16)	NOT NULL WITH DEFAULT,
+	searchname	VARCHAR(16) 	NOT NULL WITH DEFAULT,
 	mach_id		INTEGER 	NOT NULL WITH DEFAULT,
 	dir		CHAR(32) 	NOT NULL WITH DEFAULT,
 	rp		CHAR(16) 	NOT NULL WITH DEFAULT,
