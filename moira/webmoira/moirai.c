@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/webmoira/moirai.c,v 1.2 2001-10-04 01:16:31 zacheiss Exp $ */
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/webmoira/moirai.c,v 1.2.2.1 2002-11-04 02:57:22 zacheiss Exp $ */
 #include "mit_moira_MoiraConnectInternal.h"
 #include <moira.h>
 #include <mr_et.h>
@@ -89,7 +89,7 @@ JNIEXPORT void JNICALL Java_mit_moira_MoiraConnectInternal_proxy(JNIEnv *env,
 JNIEXPORT void JNICALL Java_mit_moira_MoiraConnectInternal_auth(JNIEnv *env,
 						      jclass Class) {
     int status;
-    status = mr_auth("JavaInterface");
+    status = mr_krb5_auth("JavaInterface");
     if (status != MR_SUCCESS) throwMoiraException(env, status);
     return;
 }

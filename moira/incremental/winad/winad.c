@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/incremental/winad/winad.c,v 1.30.2.1 2002-08-14 21:30:36 zacheiss Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/incremental/winad/winad.c,v 1.30.2.2 2002-11-04 02:57:02 zacheiss Exp $
 /* winad.incr arguments examples
  *
  * arguments when moira creates the account - ignored by winad.incr since the account is unusable.
@@ -1775,7 +1775,7 @@ int moira_connect(void)
 #endif /*WIN32*/
 /*det
       if (!rc)
-        rc = mr_auth("winad.incr");
+        rc = mr_krb5_auth("winad.incr");
 */
       return rc;
     }
