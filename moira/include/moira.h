@@ -1,4 +1,4 @@
-/* $Id: moira.h,v 1.29 2000-08-18 11:50:37 zacheiss Exp $
+/* $Id: moira.h,v 1.29.4.1 2002-08-14 21:30:29 zacheiss Exp $
  *
  * Copyright (C) 1987-1998 by the Massachusetts Institute of Technology
  *
@@ -47,7 +47,8 @@
 #define MR_MOTD 6
 #define MR_PROXY 7
 #define MR_SETVERSION 8
-#define MR_MAX_PROC 8
+#define MR_KRB5_AUTH 9
+#define MR_MAX_PROC 9
 
 /* values used in NFS physical flags */
 #define MR_FS_STUDENT	0x0001
