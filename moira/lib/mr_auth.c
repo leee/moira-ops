@@ -1,4 +1,4 @@
-/* $Id: mr_auth.c,v 1.24.4.2 2002-08-15 11:46:50 zacheiss Exp $
+/* $Id: mr_auth.c,v 1.24.4.3 2002-08-19 17:42:45 zacheiss Exp $
  *
  * Handles the client side of the sending of authenticators to the moira server
  *
@@ -21,7 +21,7 @@
 krb5_context context = NULL;
 krb5_auth_context auth_con = NULL;
 
-RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/lib/mr_auth.c,v 1.24.4.2 2002-08-15 11:46:50 zacheiss Exp $");
+RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/lib/mr_auth.c,v 1.24.4.3 2002-08-19 17:42:45 zacheiss Exp $");
 
 /* Authenticate this client with the Moira server.  prog is the name of the
  * client program, and will be recorded in the database.
@@ -102,6 +102,7 @@ int mr_krb5_auth(char *prog)
   int argl[2];
   krb5_ccache ccache = NULL;
   krb5_data auth;
+  krb5_error_code problem;
 
   CHECK_CONNECTED;
 
@@ -118,21 +119,21 @@ int mr_krb5_auth(char *prog)
   *p = '\0';
 
   if (!context)
-    status = krb5_init_context(&context);
-  if (status)
+    problem = krb5_init_context(&context);
+  if (problem)
     goto out;
 
-  status = krb5_auth_con_init(context, &auth_con);
-  if (status)
+  problem = krb5_auth_con_init(context, &auth_con);
+  if (problem)
     goto out;
 
-  status = krb5_cc_default(context, &ccache);
-  if (status)
+  problem = krb5_cc_default(context, &ccache);
+  if (problem)
     goto out;
 
-  status = krb5_mk_req(context, &auth_con, NULL, MOIRA_SNAME, host, NULL, 
+  problem = krb5_mk_req(context, &auth_con, NULL, MOIRA_SNAME, host, NULL, 
 		       ccache, &auth);
-  if (status)
+  if (problem)
     goto out;
 
   params.u.mr_procno = MR_KRB5_AUTH;
@@ -155,6 +156,7 @@ int mr_krb5_auth(char *prog)
   krb5_free_data_contents(context, &auth);
   if (auth_con)
     krb5_auth_con_free(context, auth_con);
+  auth_con = NULL;
 
   return status;
 }
