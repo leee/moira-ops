@@ -1,4 +1,4 @@
-/* $Id: queries2.c,v 2.88.2.2 2001-08-21 03:54:39 zacheiss Exp $
+/* $Id: queries2.c,v 2.88.2.3 2001-08-22 08:07:18 zacheiss Exp $
  *
  * This file defines the query dispatch table
  *
@@ -1151,8 +1151,9 @@ static char *gsnt2_fields[] = {
 
 static char *gsnt_fields[] = {
   "name",
-  "name", "description", "status", "address", "mask", "low", "high", "prefix",
-  "ace_type", "ace_name", "modtime", "modby", "modwith"
+  "name", "description", "status", "contact", "account_number", "address", 
+  "mask", "low", "high", "prefix", "ace_type", "ace_name", "modtime", 
+  "modby", "modwith"
 };
 
 static struct validate gsnt_validate = {
@@ -1198,27 +1199,29 @@ static struct validate asnt2_validate =
 };
 
 static char *asnt_fields[] = {
-  "name", "description", "status", "address", "mask", "low", "high", "prefix",
-  "ace_type", "ace_name",
+  "name", "description", "status", "contact", "account_number", "address", 
+  "mask", "low", "high", "prefix", "ace_type", "ace_name",
 };
 
 static struct valobj asnt_valobj[] = {
   {V_CHAR, 0, SUBNET_TABLE, "name"},
   {V_LEN, 1, SUBNET_TABLE, "description"},
   {V_NUM, 2},
-  {V_NUM, 3},
-  {V_NUM, 4},
+  {V_CHAR, 3, SUBNET_TABLE, "contact"},
+  {V_CHAR, 4, SUBNET_TABLE, "account_number"},
   {V_NUM, 5},
   {V_NUM, 6},
-  {V_LEN, 7, SUBNET_TABLE, "prefix"},
-  {V_TYPE, 8, 0, "ace_type", 0, MR_ACE},
-  {V_TYPEDATA, 9, 0, 0, 0, MR_ACE},
+  {V_NUM, 7},
+  {V_NUM, 8},
+  {V_LEN, 9, SUBNET_TABLE, "prefix"},
+  {V_TYPE, 10, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 11, 0, 0, 0, MR_ACE},
 };
 
 static struct validate asnt_validate =
 {
   asnt_valobj,
-  10,
+  12,
   "name",
   "name = UPPER('%s')",
   1,
@@ -1262,8 +1265,8 @@ static struct validate usnt2_validate =
 
 static char *usnt_fields[] = {
   "name",
-  "newname", "description", "status", "address", "mask", "low", "high", 
-  "prefix", "ace_type", "ace_name",
+  "newname", "description", "status", "contact", "account_number", "address", 
+  "mask", "low", "high", "prefix", "ace_type", "ace_name",
 };
 
 static struct valobj usnt_valobj[] = {
@@ -1271,19 +1274,21 @@ static struct valobj usnt_valobj[] = {
   {V_RENAME, 1, SUBNET_TABLE, "name", "snet_id", MR_NOT_UNIQUE},
   {V_LEN, 2, SUBNET_TABLE, "description"},
   {V_NUM, 3},
-  {V_NUM, 4},
-  {V_NUM, 5},
+  {V_CHAR, 4, SUBNET_TABLE, "contact"},
+  {V_CHAR, 5, SUBNET_TABLE, "account_number"},
   {V_NUM, 6},
   {V_NUM, 7},
-  {V_LEN, 8, SUBNET_TABLE, "prefix"},
-  {V_TYPE, 9, 0, "ace_type", 0, MR_ACE},
-  {V_TYPEDATA, 10, 0, 0, 0, MR_ACE},
+  {V_NUM, 8},
+  {V_NUM, 9},
+  {V_LEN, 10, SUBNET_TABLE, "prefix"},
+  {V_TYPE, 11, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 12, 0, 0, 0, MR_ACE},
 };
 
 static struct validate usnt_validate =
 {
   usnt_valobj,
-  11,
+  13,
   "name",
   "snet_id = %d",
   1,
@@ -4738,9 +4743,9 @@ struct query Queries[] = {
     RETRIEVE,
     "s",
     SUBNET_TABLE,
-    "name, description, status, saddr, mask, low, high, prefix, owner_type, owner_id, TO_CHAR(modtime, 'DD-mon-YYYY HH24:MI:SS'), modby, modwith FROM subnet",
+    "name, description, status, contact, account_number, saddr, mask, low, high, prefix, owner_type, owner_id, TO_CHAR(modtime, 'DD-mon-YYYY HH24:MI:SS'), modby, modwith FROM subnet",
     gsnt_fields,
-    13,
+    15,
     "name LIKE UPPER('%s')",
     1,
     "name",
@@ -4772,9 +4777,9 @@ struct query Queries[] = {
     APPEND,
     "s",
     SUBNET_TABLE,
-    "INTO subnet (name, description, status, saddr, mask, low, high, prefix, owner_type, owner_id, snet_id) VALUES (UPPER('%s'), NVL('%s', CHR(0)), %s, %d, %s, %s, %s, NVL('%s', CHR(0)), '%s', %d, %s)",
+    "INTO subnet (name, description, status, contact, account_number, saddr, mask, low, high, prefix, owner_type, owner_id, snet_id) VALUES (UPPER('%s'), NVL('%s', CHR(0)), %s, NVL('%s', CHR(0)), %s, %s, %s, %s, %s, NVL('%s', CHR(0)), '%s', %d, %s)",
     asnt_fields,
-    10,
+    12,
     0,
     0,
     NULL,
@@ -4806,9 +4811,9 @@ struct query Queries[] = {
     UPDATE,
     "s",
     SUBNET_TABLE,
-    "subnet SET name = UPPER('%s'), description = NVL('%s', CHR(0)), status = %s, saddr = %s, mask = %s, low = %s, high = %s, prefix = NVL('%s', CHR(0)), owner_type = '%s', owner_id = %d",
+    "subnet SET name = UPPER('%s'), description = NVL('%s', CHR(0)), status = %s, contact = NVL('%s', CHR(0)), account_number = NVL('%s', CHR(0)), saddr = %s, mask = %s, low = %s, high = %s, prefix = NVL('%s', CHR(0)), owner_type = '%s', owner_id = %d",
     usnt_fields,
-    10,
+    12,
     "snet_id = %d",
     1,
     NULL,

@@ -1,4 +1,4 @@
-/* $Id: qsetup.pc,v 2.43.2.2 2001-08-21 03:56:15 zacheiss Exp $
+/* $Id: qsetup.pc,v 2.43.2.3 2001-08-22 08:07:18 zacheiss Exp $
  *
  * Query setup routines
  *
@@ -21,7 +21,7 @@
 
 EXEC SQL INCLUDE sqlca;
 
-RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsetup.pc,v 2.43.2.2 2001-08-21 03:56:15 zacheiss Exp $");
+RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsetup.pc,v 2.43.2.3 2001-08-22 08:07:18 zacheiss Exp $");
 
 extern char *whoami;
 extern int dbms_errno, mr_errcode;
@@ -236,7 +236,8 @@ int setup_dmac(struct query *q, char *argv[], client *cl)
 
 int setup_asnt(struct query *q, char *argv[], client *cl)
 {
-  int high, low, row;
+  int high, low, row, status;
+  char *account_number;
 
   /* Check for asnt or usnt. */
   if (q->type == APPEND)
@@ -244,9 +245,22 @@ int setup_asnt(struct query *q, char *argv[], client *cl)
   else
     row = 1;
 
-  low = atoi(argv[row + 5]);
-  high = atoi(argv[row + 6]);
-
+  low = atoi(argv[row + 7]);
+  high = atoi(argv[row + 8]);
+  status = atoi(argv[row + 2]);
+  account_number = argv[row + 4];
+  
+  /* Don't allow Private subnets to be created without a valid billing
+   * number.
+   */
+  if (status == SNET_STATUS_PRIVATE)
+    {
+      EXEC SQL SELECT account_number FROM accountnumbers
+	WHERE account_number = :account_number;
+      if (sqlca.sqlcode == SQL_NO_MATCH)
+	return MR_ACCOUNT_NUMBER;
+    }
+      
   /* Special case 0.0.0.0 and 255.255.255.255 */
   if (!(low == 0 || low == -1 || high == 0 || high == -1))
     if (low > high)
