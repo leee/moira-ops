@@ -1,4 +1,4 @@
-/* $Id: auth_003.c,v 1.1.2.1 2002-08-14 21:30:53 zacheiss Exp $
+/* $Id: auth_003.c,v 1.1.2.2 2002-08-15 11:46:56 zacheiss Exp $
  *
  * Copyright (C) 1988-1998 by the Massachusetts Institute of Technology.
  * For copying and distribution information, please see the file
@@ -18,7 +18,7 @@
 #include <krb.h>
 #include <krb5.h>
 
-RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/update/auth_003.c,v 1.1.2.1 2002-08-14 21:30:53 zacheiss Exp $");
+RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/update/auth_003.c,v 1.1.2.2 2002-08-15 11:46:56 zacheiss Exp $");
 
 static char service[] = "host";
 static char master[] = "sms";
@@ -36,10 +36,10 @@ static char qmark[] = "???";
 
 void auth_003(int conn, char *str)
 {
-  krb5_context context;
-  krb5_auth_context auth_con;
+  krb5_context context = NULL;
+  krb5_auth_context auth_con = NULL;
   krb5_data auth;
-  krb5_principal server, client;
+  krb5_principal server = NULL, client = NULL;
   krb5_ticket *ticket;
   char *p, *first, *data;
   char name[ANAME_SZ], inst[INST_SZ], realm[REALM_SZ];
@@ -47,6 +47,8 @@ void auth_003(int conn, char *str)
   size_t size;
   long code;
   struct utsname uts;
+
+  ticket = NULL;
 
   send_ok(conn);
 
@@ -165,8 +167,7 @@ void auth_003(int conn, char *str)
     krb5_free_principal(context, server);
   if (ticket)
     krb5_free_ticket(context, ticket);
-  if (auth.data)
-    krb5_free_data_contents(context, &auth);
+  krb5_free_data_contents(context, &auth);
   if (auth_con)
     krb5_auth_con_free(context, auth_con);
   return;

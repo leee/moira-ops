@@ -1,4 +1,4 @@
-/* $Id: client.c,v 1.26.4.1 2002-08-14 21:30:53 zacheiss Exp $
+/* $Id: client.c,v 1.26.4.2 2002-08-15 11:46:56 zacheiss Exp $
  *
  * This code handles the actual distribution of data files
  * to servers in the Moira server-update program.
@@ -21,7 +21,7 @@
 #include <krb.h>
 #include <krb5.h>
 
-RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/update/client.c,v 1.26.4.1 2002-08-14 21:30:53 zacheiss Exp $");
+RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/update/client.c,v 1.26.4.2 2002-08-15 11:46:56 zacheiss Exp $");
 
 extern des_cblock session;
 extern char *whoami;
@@ -45,8 +45,7 @@ int mr_send_krb5_auth(int conn, char *host_name)
   if (response)
     {
       /* Talking to a server that doesn't do AUTH_003 */
-      if (auth.data)
-	krb5_free_data_contents(context, &auth);
+      krb5_free_data_contents(context, &auth);
       return response;
     }
   code = send_string(conn, (char *)auth.data, auth.length);
@@ -57,16 +56,14 @@ int mr_send_krb5_auth(int conn, char *host_name)
     goto out;
   if (response)
     {
-      if (auth.data)
-	krb5_free_data_contents(context, &auth);
+      krb5_free_data_contents(context, &auth);
       return response;
     }
 
   return MR_SUCCESS;
 
  out:
-  if (auth.data)
-    krb5_free_data_contents(context, &auth);
+  krb5_free_data_contents(context, &auth);
   return code;
 }
 
