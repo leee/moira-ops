@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/letter.dc,v 1.5 1992-07-16 10:35:15 mar Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/letter.dc,v 1.5.1.1 1992-09-14 23:48:13 genoa Exp $
  *
  * This generates confirmation letters to people who recently set
  * their secure instance passwords.
@@ -40,10 +40,10 @@ char **argv;
     EXEC SQL END DECLARE SECTION;
 
 #ifsql INGRES
-    EXEC SQL CONNECT sms;
+    EXEC SQL CONNECT moira;
 #endsql
 #ifsql INFORMIX
-    EXEC SQL DATABASE sms;
+    EXEC SQL DATABASE moira;
 #endsql
 
     if (argc == 2) {
