@@ -1,6 +1,6 @@
 /* This file defines the query dispatch table for version 2 of the protocol
  *
- * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.28.2.5 1997-10-03 18:07:16 danw Exp $
+ * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.28.2.6 1997-11-11 23:04:20 danw Exp $
  *
  * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
  * For copying and distribution information, please see the file
@@ -128,7 +128,7 @@ static struct valobj VOclu0[] = {
 };
 
 static struct valobj VOsnet0[] = {
-  {V_ID, 0, SUBNET_TABLE, "name", "snet_id", MR_CLUSTER},
+  {V_ID, 0, SUBNET_TABLE, "name", "snet_id", MR_SUBNET},
 };
 
 static struct valobj VOlist0[] = {
@@ -137,10 +137,6 @@ static struct valobj VOlist0[] = {
 
 static struct valobj VOfilsys0[] = {
   {V_ID, 0, FILESYS_TABLE, "label", "filsys_id", MR_FILESYS},
-};
-
-static struct valobj VOchar0[] = {
-  {V_CHAR, 0},
 };
 
 
@@ -352,7 +348,7 @@ static char *rusr_fields[] = {
 
 static struct valobj rusr_valobj[] = {
   {V_NUM, 0},
-  {V_CHAR, 1},
+  {V_CHAR, 1, USERS_TABLE, "login"},
   {V_NUM, 2},
 };
 
@@ -486,26 +482,6 @@ static char *dusr_fields[] = {
 
 static struct validate dusr_validate = {
   VOuser0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  0,
-  setup_dusr,
-  0,
-};
-
-static char *dubu_fields[] = {
-  "uid",
-};
-
-static struct valobj dubu_valobj[] = {
-  {V_ID, 0, USERS_TABLE, "uid", "users_id", MR_USER}
-};
-
-static struct validate dubu_validate = {
-  dubu_valobj,
   1,
   0,
   0,
@@ -2763,22 +2739,6 @@ struct query Queries2[] = {
     1,
     0,
     &dusr_validate,
-  },
-
-  {
-    /* Q_DUBU - DELETE_USER_BY_UID */
-    "delete_user_by_uid",
-    "dubu",
-    DELETE,
-    "u",
-    USERS_TABLE,
-    (char *)0,
-    dubu_fields,
-    0,
-    "users_id = %d",
-    1,
-    0,
-    &dubu_validate,
   },
 
   {

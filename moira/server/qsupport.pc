@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v $
  *	$Author: danw $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v 2.5.2.1 1997-10-03 17:31:20 danw Exp $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v 2.5.2.2 1997-11-11 23:04:18 danw Exp $
  *
  *	Copyright (C) 1987 by the Massachusetts Institute of Technology
  *	For copying and distribution information, please see the file
@@ -10,7 +10,7 @@
  */
 
 #ifndef lint
-static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v 2.5.2.1 1997-10-03 17:31:20 danw Exp $";
+static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qsupport.pc,v 2.5.2.2 1997-11-11 23:04:18 danw Exp $";
 #endif lint
 
 #include <mit-copyright.h>
@@ -69,9 +69,7 @@ int set_pobox(q, argv, cl)
 
     if (!strcmp(argv[1], "POP")) {
 	status = name_to_id(box, MACHINE_TABLE, &id);
-	if (status == MR_NO_MATCH)
-	  return(MR_MACHINE);
-	else if (status)
+	if (status)
 	  return(status);
 	EXEC SQL UPDATE users SET potype = 'POP', pop_id = :id
 	  WHERE users_id = :user;

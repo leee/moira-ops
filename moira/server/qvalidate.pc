@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v $
  *	$Author: danw $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.4 1997-10-03 17:31:24 danw Exp $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.5 1997-11-11 23:04:23 danw Exp $
  *
  *	Copyright (C) 1987 by the Massachusetts Institute of Technology
  *	For copying and distribution information, please see the file
@@ -10,7 +10,7 @@
  */
 
 #ifndef lint
-static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.4 1997-10-03 17:31:24 danw Exp $";
+static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.5 1997-11-11 23:04:23 danw Exp $";
 #endif lint
 
 #include <mit-copyright.h>
@@ -206,7 +206,7 @@ int validate_id(q, argv, vo)
     register struct valobj *vo;
 {
     EXEC SQL BEGIN DECLARE SECTION;
-    char *name, *namefield, *idfield;
+    char *name;
     int id, rowcount, tbl;
     EXEC SQL END DECLARE SECTION;
     int status;
@@ -214,39 +214,23 @@ int validate_id(q, argv, vo)
 
     name = argv[vo->index];
     tbl = vo->table;
-    namefield = vo->namefield;
-    idfield = vo->idfield;
 
-    if ((tbl==USERS_TABLE && !strcmp(namefield, "login")) ||
-	tbl==MACHINE_TABLE || tbl==SUBNET_TABLE || tbl==FILESYS_TABLE ||
-	tbl==LIST_TABLE || tbl==CLUSTER_TABLE || tbl==STRINGS_TABLE) {
-      if (tbl==MACHINE_TABLE || tbl==SUBNET_TABLE)
+    if (tbl==MACHINE_TABLE || tbl==SUBNET_TABLE)
 	for (c = name; *c; c++) if (islower(*c)) *c = toupper(*c);
-      status = name_to_id(name, tbl, &id);
-      if (status == 0) {
+    status = name_to_id(name, tbl, &id);
+    if (status == 0) {
 	*(int *)argv[vo->index] = id;
 	return(MR_EXISTS);
-      } else if (status == MR_NO_MATCH && tbl==STRINGS_TABLE &&
-		 (q->type == APPEND || q->type == UPDATE)) {
+    } else if (status == MR_NO_MATCH && tbl==STRINGS_TABLE &&
+	       (q->type == APPEND || q->type == UPDATE)) {
 	id=add_string(name);
 	cache_entry(name, STRINGS_TABLE, id);
 	*(int *)argv[vo->index] = id;
 	return(MR_EXISTS);
-      } else if (status == MR_NO_MATCH || status == MR_NOT_UNIQUE)
+    } else if (status == MR_NO_MATCH || status == MR_NOT_UNIQUE)
 	return(vo->error);
-      else
+    else
 	return(status);
-    } else {
-      /* else, it's `dubu', which uses unix_uid from users */
-      EXEC SQL SELECT COUNT(*) INTO :rowcount FROM users
-	WHERE unix_uid = :name;
-      if (dbms_errno) return(mr_errcode);
-      if (rowcount != 1) return(vo->error);
-      EXEC SQL SELECT users_id INTO :id FROM users
-	WHERE unix_uid = :name;
-      *(int *)argv[vo->index] = id;
-      return(MR_EXISTS);
-    }
 }
 
 int validate_name(argv, vo)
