@@ -1,4 +1,4 @@
-/* $Id: utils.c,v 1.5.4.1 2002-08-14 21:30:10 zacheiss Exp $
+/* $Id: utils.c,v 1.5.4.2 2002-08-19 17:42:10 zacheiss Exp $
  *
  * Random client utilities.
  *
@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/clients/lib/utils.c,v 1.5.4.1 2002-08-14 21:30:10 zacheiss Exp $");
+RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/clients/lib/utils.c,v 1.5.4.2 2002-08-19 17:42:10 zacheiss Exp $");
 
 extern char *whoami;
 extern krb5_context context;
@@ -104,9 +104,10 @@ int mrcl_connect(char *server, char *client, int version, int auth)
 
 char *mrcl_krb_user(void)
 {
-  int status, flags = 0;
+  int flags = 0;
   krb5_ccache cache = NULL;
   krb5_principal princ;
+  krb5_error_code status;
   char *name;
 
   if (!context)
