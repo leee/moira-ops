@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/ca.dc,v 1.3 1991-11-01 18:44:05 mar Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/ca.dc,v 1.3.1.1 1992-09-14 23:21:53 genoa Exp $
  *
  * This generates a list of users and their home directories for the
  * Centra America daemon.
@@ -46,10 +46,10 @@ char **argv;
     initialize_sms_error_table ();
 
 #ifsql INGRES
-    EXEC SQL CONNECT sms;
+    EXEC SQL CONNECT moira;
 #endsql
 #ifsql INFORMIX
-    EXEC SQL DATABASE sms;
+    EXEC SQL DATABASE moira;
 #endsql
 
     if (argc == 2) {
@@ -75,6 +75,9 @@ char **argv;
 	outf = NULL;
     }
 
+    /* The following WHENEVER is declarative, not executed,
+     * and applies for the remainder of this file only.
+     */
     EXEC SQL WHENEVER SQLERROR GOTO sqlerr;
     sq = sq_create();
 
@@ -126,7 +129,7 @@ char **argv;
     EXEC SQL DECLARE z CURSOR FOR 
       SELECT DISTINCT u.login, u.fullname, f.name
       FROM users u, filesys f
-	WHERE f.label = u.login and u.status = 1 and f.type = "AFS"
+	WHERE f.label = u.login and u.status = 1 and f.type = 'AFS'
     	ORDER BY name;
     EXEC SQL OPEN z;
     while (1) {
