@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/hosts.dc,v 1.7 1994-05-12 21:43:16 tom Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/hosts.dc,v 1.7.4.1 1996-09-29 20:55:50 danw Exp $
  *
  * This generates the hstath.txt hosttable.
  *
@@ -67,6 +67,11 @@ char **argv;
     }
 
     EXEC SQL WHENEVER SQLERROR GOTO sqlerr;
+
+    /* Acquire the required locks in the appropriate order */
+
+    EXEC SQL SELECT modtime INTO :name FROM machine WHERE mach_id = 0;
+    EXEC SQL SELECT modtime INTO :name FROM hostalias WHERE mach_id = 0;
 
     gettimeofday(&now, NULL);
     

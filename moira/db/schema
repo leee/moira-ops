@@ -47,7 +47,11 @@ create table users
 create table krbmap
 (
 	users_id	INTEGER 	NOT NULL WITH DEFAULT,
-	string_id	INTEGER 	NOT NULL WITH DEFAULT
+	string_id	INTEGER 	NOT NULL WITH DEFAULT,
+	modtime		DATE    	NOT NULL WITH DEFAULT,
+	modby		INTEGER 	NOT NULL WITH DEFAULT,
+	modwith		CHAR(8) 	NOT NULL WITH DEFAULT
+
 );
 create table machine
 (
@@ -77,7 +81,11 @@ create table machine
 create table hostalias
 (
 	name		VARCHAR(40) 	NOT NULL WITH DEFAULT,
-	mach_id		INTEGER	 	NOT NULL WITH DEFAULT
+	mach_id		INTEGER	 	NOT NULL WITH DEFAULT,
+	modtime		DATE    	NOT NULL WITH DEFAULT,
+	modby		INTEGER 	NOT NULL WITH DEFAULT,
+	modwith		CHAR(8) 	NOT NULL WITH DEFAULT
+
 );
 create table subnet
 (
@@ -108,13 +116,21 @@ create table cluster
 create table mcmap
 (
 	mach_id		INTEGER 	NOT NULL WITH DEFAULT,
-	clu_id		INTEGER 	NOT NULL WITH DEFAULT
+	clu_id		INTEGER 	NOT NULL WITH DEFAULT,
+	modtime		DATE    	NOT NULL WITH DEFAULT,
+	modby		INTEGER 	NOT NULL WITH DEFAULT,
+	modwith		CHAR(8) 	NOT NULL WITH DEFAULT
+
 );
 create table svc
 (
 	clu_id		INTEGER 	NOT NULL WITH DEFAULT,
 	serv_label	VARCHAR(16) 	NOT NULL WITH DEFAULT,
-	serv_cluster	CHAR(32) 	NOT NULL WITH DEFAULT
+	serv_cluster	CHAR(32) 	NOT NULL WITH DEFAULT,
+	modtime		DATE    	NOT NULL WITH DEFAULT,
+	modby		INTEGER 	NOT NULL WITH DEFAULT,
+	modwith		CHAR(8) 	NOT NULL WITH DEFAULT
+
 );
 create table list
 (
@@ -139,7 +155,11 @@ create table imembers
 	member_type	CHAR(8) 	NOT NULL WITH DEFAULT,
 	member_id	INTEGER 	NOT NULL WITH DEFAULT,
 	ref_count	SMALLINT 	NOT NULL WITH DEFAULT,
-	direct		SMALLINT 	NOT NULL WITH DEFAULT
+	direct		SMALLINT 	NOT NULL WITH DEFAULT,
+	modtime		DATE    	NOT NULL WITH DEFAULT,
+	modby		INTEGER 	NOT NULL WITH DEFAULT,
+	modwith		CHAR(8) 	NOT NULL WITH DEFAULT
+
 );
 create table servers 
 (
@@ -203,7 +223,11 @@ create table fsgroup
 (
 	group_id	INTEGER 	NOT NULL WITH DEFAULT,
 	filsys_id	INTEGER 	NOT NULL WITH DEFAULT,
-	key		CHAR(8) 	NOT NULL WITH DEFAULT
+	key		CHAR(8) 	NOT NULL WITH DEFAULT,
+	modtime		DATE    	NOT NULL WITH DEFAULT,
+	modby		INTEGER 	NOT NULL WITH DEFAULT,
+	modwith		CHAR(8) 	NOT NULL WITH DEFAULT
+
 );
 create table nfsphys 
 (
@@ -295,7 +319,11 @@ create table capacls
 (
 	capability	CHAR(32) 	NOT NULL WITH DEFAULT,
 	tag		CHAR(4) 	NOT NULL WITH DEFAULT,
-	list_id		INTEGER 	NOT NULL WITH DEFAULT
+	list_id		INTEGER 	NOT NULL WITH DEFAULT,
+	modtime		DATE    	NOT NULL WITH DEFAULT,
+	modby		INTEGER 	NOT NULL WITH DEFAULT,
+	modwith		CHAR(8) 	NOT NULL WITH DEFAULT
+
 );
 create table alias 
 (

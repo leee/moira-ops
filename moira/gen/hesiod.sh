@@ -1,6 +1,6 @@
 #!/bin/csh -f
 # This script performs updates of hesiod files on hesiod servers.  
-# $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/hesiod.sh,v 1.11 1991-09-03 15:46:21 mar Exp $
+# $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/hesiod.sh,v 1.11.2.1 1996-09-29 20:55:49 danw Exp $
 
 set path=(/etc /bin /usr/bin /usr/etc /usr/athena/etc)
 
@@ -14,7 +14,7 @@ set MR_TARERR = 	47836476
 umask 22
 
 # File that will contain the necessary information to be updated
-set TARFILE=/tmp/hesiod.out
+set TARFILE=/var/tmp/hesiod.out
 # Directory into which we will empty the tarfile
 set SRC_DIR=/etc/athena/_nameserver
 # Directory into which we will put the final product
@@ -67,7 +67,9 @@ end
 # existance as evidence that named as has been successfully restarted.
 
 # First, get statistics
-kill -IOT `cat /etc/named.pid`
+rm -f /usr/tmp/named.stats
+ln -s /var/named.stats /usr/tmp/named.stats
+kill -6 `cat /etc/named.pid`
 sleep 1
 # Use /bin/kill because, due to a bug in some versions of csh, failure
 # of a builtin will cause the script to abort
@@ -75,9 +77,11 @@ kill -KILL `cat /etc/named.pid`
 rm -f /etc/named.pid
 
 # Restart named.
-(unlimit; /etc/named&)
-sleep 5
-mv /etc/named.pid /etc/named.pid.restart
+# mv /etc/named.pid /etc/named.pid.restart
+#(unlimit; /etc/named&)
+/etc/named
+#sleep 5
+echo named started
 
 # This timeout is implemented by having the shell check TIMEOUT times
 # for the existance of /etc/named.pid and to sleep INTERVAL seconds
@@ -91,12 +95,14 @@ while ($i < $TIMEOUT)
    if (-f /etc/named.pid) break
    @ i++
 end
-
+echo out of timeout loop
 # Did it time out?
 if ($i == $TIMEOUT) exit $MR_NAMED
-
+echo no timeout
 # Clean up!
 rm -f $TARFILE
+echo removed tarfile
 rm -f $0
+echo removed self
 
 exit 0

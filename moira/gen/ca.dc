@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/ca.dc,v 1.5 1993-04-15 12:15:06 mar Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/ca.dc,v 1.5.4.1 1996-09-29 20:55:46 danw Exp $
  *
  * This generates a list of users and their home directories for the
  * Centra America daemon.
@@ -77,6 +77,12 @@ char **argv;
     }
 
     EXEC SQL WHENEVER SQLERROR GOTO sqlerr;
+
+    /* Get locks */
+    EXEC SQL SELECT modtime INTO :name FROM filesys WHERE filsys_id = 0;
+    EXEC SQL SELECT modtime INTO :name FROM users WHERE users_id = 0;
+    EXEC SQL SELECT modtime INTO :name FROM machine WHERE mach_id = 0;
+    EXEC SQL SELECT modtime INTO :name FROM nfsphys WHERE mach_id = 0;
     sq = sq_create();
 
     cnt = 0;
@@ -179,3 +185,5 @@ char **argv;
 		   sqlca.sqlcode);
     exit(MR_INGRES_ERR);
 }
+
+

@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/zephyr.dc,v 1.2 1992-12-21 18:00:09 mar Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/zephyr.dc,v 1.2.4.1 1996-09-29 20:55:56 danw Exp $
  *
  * This generates zephyr acl files
  *
@@ -122,9 +122,15 @@ int do_classes()
      * not in the order of execution of statements.
      */
     EXEC SQL WHENEVER SQLERROR GOTO sqlerr;
+
+    /* Acquire locks for tables */
+    EXEC SQL SELECT modtime INTO :zclass FROM imembers WHERE list_id=0;
+    EXEC SQL SELECT modtime INTO :zclass FROM users  WHERE list_id = 0;
+    EXEC SQL SELECT modtime INTO :zclass FROM zephyr WHERE xmt_id = 0;
+
     EXEC SQL DECLARE classes CURSOR FOR SELECT class, xmt_type, xmt_id,
     	sub_type, sub_id, iws_type, iws_id, iui_type, iui_id
-      FROM zephyr;
+      FROM zephyr WHERE xmt_id != 0;
     EXEC SQL OPEN classes;
     while (1) {
 	EXEC SQL FETCH classes INTO

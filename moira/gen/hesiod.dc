@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/hesiod.dc,v 1.14 1993-11-24 15:50:05 mar Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/hesiod.dc,v 1.14.4.1 1996-09-29 20:55:47 danw Exp $
  *
  * This generates the zone files necessary to load a hesiod server.
  * The following zones are generated: passwd, uid, pobox, group,
@@ -122,7 +122,7 @@ get_mach()
     EXEC SQL DECLARE m_cursor CURSOR FOR
       SELECT name, mach_id
       FROM machine
-      WHERE status = 1
+      WHERE status = 1 and mach_id != 0
       ORDER BY mach_id;
     EXEC SQL OPEN m_cursor;
     while (1) {
@@ -309,8 +309,10 @@ do_groups()
     EXEC SQL WHENEVER SQLERROR GOTO sqlerr;
 
     /* get lock records */
-    EXEC SQL SELECT modtime INTO :name FROM list WHERE list_id = 0;
+    EXEC SQL SELECT modtime INTO :name FROM imembers WHERE list_id = 0;
     EXEC SQL SELECT modtime INTO :name FROM users WHERE users_id = 0;
+    EXEC SQL SELECT modtime INTO :name FROM list WHERE list_id = 0;
+
 
     EXEC SQL DECLARE l_cursor CURSOR FOR
       SELECT name, gid, list_id
@@ -457,6 +459,11 @@ do_filsys()
     get_mach();
     sq = sq_create();
     sq2 = sq_create();
+
+    /* get lock records */
+
+    EXEC SQL SELECT modtime INTO :name from filesys where filsys_id = 0;
+    EXEC SQL SELECT modtime INTO :name from fsgroup where filsys_id = 0;
 
     EXEC SQL DECLARE f_cursor CURSOR FOR
       SELECT label, type, name, mach_id, access, mount, comments, filsys_id
@@ -645,6 +652,12 @@ do_cluster()
 
     fprintf(stderr, "Building cluster.db\n");
     get_mach();
+
+    /* get lock records */
+    EXEC SQL SELECT modtime INTO :name  FROM machine where mach_id = 0;
+    EXEC SQL SELECT modtime INTO :name  FROM cluster where clu_id = 0;
+    EXEC SQL SELECT modtime INTO :name  FROM mcmap where mach_id = 0;
+    EXEC SQL SELECT modtime INTO :name  FROM svc where clu_id = 0;
 
     EXEC SQL SELECT MAX(clu_id) INTO :maxclu FROM cluster;
     maxclu++;
@@ -1063,3 +1076,10 @@ do_service()
     db_error(sqlca.sqlcode);
     return(0);
 }
+
+
+
+
+
+
+

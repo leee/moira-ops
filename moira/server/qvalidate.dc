@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.dc,v $
- *	$Author: tytso $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.dc,v 1.3 1993-12-10 13:49:08 tytso Exp $
+ *	$Author: danw $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.dc,v 1.3.2.1 1996-09-29 20:56:02 danw Exp $
  *
  *	Copyright (C) 1987 by the Massachusetts Institute of Technology
  *	For copying and distribution information, please see the file
@@ -10,7 +10,7 @@
  */
 
 #ifndef lint
-static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.dc,v 1.3 1993-12-10 13:49:08 tytso Exp $";
+static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.dc,v 1.3.2.1 1996-09-29 20:56:02 danw Exp $";
 #endif lint
 
 #include <mit-copyright.h>
@@ -140,7 +140,10 @@ validate_fields(q, argv, vo, n)
 	    status = lock_table(vo);
 	    break;
 
-	case V_WILD:
+        case V_RLOCK:
+            status = readlock_table(vo);
+            break;
+        case V_WILD:
 	    status = convert_wildcards(argv[vo->index]);
 	    break;
 
@@ -150,7 +153,10 @@ validate_fields(q, argv, vo, n)
 
 	}
 
-	if (status != MR_EXISTS) return(status);
+	if (status != MR_EXISTS){
+           com_err(whoami,0,"validation failed type=%ld, code=%ld\n",vo->type, status);
+           return(status);
+        }
 	vo++;
     }
 
@@ -484,13 +490,64 @@ struct valobj *vo;
     sprintf(stmt_buf,"UPDATE %s SET modtime='now' WHERE %s.%s = 0",
 	    vo->table,vo->table,vo->idfield);
     EXEC SQL EXECUTE IMMEDIATE :stmt_buf;
-    if (ingres_errno) return(mr_errcode);
+    if (sqlca.sqlcode == 100){
+        fprintf(stderr,"readlock_table: no matching rows found for %s\n",
+                stmt_buf);
+        return(MR_INTERNAL);
+    }
+    if (ingres_errno) 
+        return(mr_errcode);
     if (sqlca.sqlerrd[2] != 1)
       return(vo->error);
     else
       return(MR_EXISTS);
 }
 
+/*
+ * Get a read lock on the table by accessing the magic lock
+ * record.  Certain tables are constructed so that they contain
+ * an id field whose value is zero and a modtime field.  We 
+ * manipulate the modtime field of the id 0 record to effect 
+ * locking of the table
+ */
+
+readlock_table(vo)
+    struct valobj *vo;
+{
+    EXEC SQL BEGIN DECLARE SECTION;
+        int id;
+        char buf[256];
+        char *tbl, *idfield;
+    EXEC SQL END DECLARE SECTION;
+
+    tbl=vo->table;
+    idfield=vo->idfield;
+    sprintf(buf,"SELECT %s FROM %s WHERE %s.%s = 0",
+        vo->idfield, vo->table, vo->table, vo->idfield);
+    EXEC SQL PREPARE stmt FROM :buf;
+    EXEC SQL DESCRIBE stmt INTO SQLDA;
+    EXEC SQL DECLARE rcsr CURSOR FOR stmt;
+    EXEC SQL OPEN rcsr;
+    EXEC SQL FETCH rcsr USING DESCRIPTOR :SQLDA;
+    /* Check for no matching rows found - this is 
+     * flagged as an internal error since the table should
+     * have a magic lock record.
+     */
+    if (sqlca.sqlcode == 100){
+        EXEC SQL CLOSE rcsr;
+        com_err(whoami,0,"readlock_table: no matching rows found for %s\n",
+                buf);
+        return(MR_INTERNAL);
+    }
+    EXEC SQL CLOSE rcsr;
+    if (ingres_errno)
+        return(mr_errcode);
+    if (sqlca.sqlcode)
+        return(vo->error);
+    return(MR_EXISTS);  /* validate_fields expects us to return
+                           * this value if everything went okay
+                           */
+}
 
 /* Check the database at startup time.  For now this just resets the
  * inprogress flags that the DCM uses.

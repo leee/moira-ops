@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/aliases.dc,v 1.6 1993-11-23 17:29:39 mar Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/aliases.dc,v 1.6.4.1 1996-09-29 20:55:45 danw Exp $
  *
  * This generates the /usr/lib/aliases mail aliases file for the mailhub.
  * The aliases file will contain:
@@ -139,15 +139,17 @@ get_info()
     EXEC SQL WHENEVER SQLERROR GOTO sqlerr;
 
     /* get locks */
-    EXEC SQL SELECT modtime INTO :buf FROM list WHERE LIST_ID = 0;
+    EXEC SQL SELECT modtime INTO :buf FROM imembers WHERE list_id = 0;
     EXEC SQL SELECT modtime INTO :buf FROM users WHERE USERS_ID = 0;
+    EXEC SQL SELECT modtime INTO :buf FROM machine WHERE mach_id = 0;
+    EXEC SQL SELECT modtime INTO :buf FROM list WHERE LIST_ID = 0;
 
     fprintf(stderr, "Loading machines\n");
     machines = create_hash(1000);
 
     EXEC SQL DECLARE m_cursor CURSOR FOR 
       SELECT mach_id, name 
-      FROM machine
+      FROM machine WHERE mach_id != 0
       ORDER BY mach_id;
     EXEC SQL OPEN m_cursor;
     while (1) {
@@ -218,7 +220,7 @@ get_info()
 
     EXEC SQL DECLARE l_cursor CURSOR FOR
       SELECT list_id, name, maillist, description, acl_type, acl_id
-      FROM list WHERE active != 0
+      FROM list WHERE active != 0 AND list_id != 0
       ORDER BY list_id;
     EXEC SQL OPEN l_cursor;
     while (1) {
@@ -247,6 +249,8 @@ get_info()
     while (1) {
         EXEC SQL FETCH mem_cursor INTO :id, :type, :mid;
 	if (sqlca.sqlcode != 0) break;
+        if (id == 0)
+            continue;
 	if (l = (struct list *) hash_lookup(lists, id)) {
 	    m = (struct member *) malloc(sizeof(struct member));
 	    if (type[0] == 'U' &&
@@ -457,3 +461,6 @@ register char *string;
 
     (void) fputc('\n', aliases);
 }
+
+
+

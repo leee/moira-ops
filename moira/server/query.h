@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/query.h,v 2.1 1993-05-10 13:30:52 mar Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/query.h,v 2.1.2.1 1996-09-29 20:56:01 danw Exp $
  *
  * Structures and constants used in the query dispatch table
  */
@@ -46,7 +46,8 @@ struct validate
 	
 /* Validated Object Types */
 enum vo_type {V_NAME, V_ID, V_TYPE, V_TYPEDATA, V_DATE, 
-	      V_SORT, V_RENAME, V_CHAR, V_LOCK, V_WILD, V_UPWILD};
+	      V_SORT, V_RENAME, V_CHAR, V_LOCK, V_WILD, V_UPWILD,
+              V_RLOCK};
 
 /* Validated Object Definition */
 struct valobj

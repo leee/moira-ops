@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/nfs.dc,v 1.4 1993-11-24 15:52:13 mar Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/nfs.dc,v 1.4.4.1 1996-09-29 20:55:52 danw Exp $
  *
  * This generates the files necessary to load an nfs server.
  *
@@ -88,6 +88,15 @@ int do_nfs()
     machs = sq_create();
     lists = sq_create();
 
+    /* Get Locks */
+    EXEC SQL SELECT modtime INTO :listname FROM imembers WHERE list_id = 0;
+    EXEC SQL SELECT modtime INTO :listname FROM filesys WHERE filsys_id = 0;
+    EXEC SQL SELECT modtime INTO :listname FROM users WHERE users_id = 0;
+    EXEC SQL SELECT modtime INTO :listname FROM machine where mach_id=0;
+    EXEC SQL SELECT modtime INTO :listname FROM list WHERE list_id = 0;
+    EXEC SQL SELECT serverhosts INTO :listname FROM machine where mach_id=0;
+
+
     /* The following is declarative, not executed,
      * and so is dependent on where it is in the file,
      * not in the order of execution of statements.
@@ -119,7 +128,10 @@ int do_nfs()
 
 
 /* Make all of the credentials lists that will be needed.  Returns 0 if
- * no files were actually changed */
+ * no files were actually changed 
+ *
+ * The caller is responsible for acquiring locks on imembers, users, list
+ */
 
 int do_lists(lists)
 struct save_queue *lists;
@@ -146,9 +158,6 @@ struct save_queue *lists;
     }
     */
 
-    /* get locks */
-    EXEC SQL SELECT modtime INTO :lname FROM list WHERE list_id = 0;
-    EXEC SQL SELECT modtime INTO :lname FROM users WHERE users_id = 0;
 
     /* build the list of everyone, and store it in a file whose name
      * corresponds to the empty list.
@@ -313,6 +322,8 @@ do_everyone()
 
 /* Now do each of the servers, linking the credentials list file and 
  * compiling the quota and dirs files.
+ *
+ * Caller is responsible for acquiring locks on machine, filesys, users
  */
 
 int do_machs(machs)
@@ -329,10 +340,6 @@ struct save_queue *machs;
 
     fprintf(stderr, "Building machine files\n");
 
-    /* acquire locks on machines & filesystems */
-    EXEC SQL SELECT modtime INTO :listname FROM users WHERE users_id = 0;
-    EXEC SQL SELECT modtime INTO :listname FROM machine WHERE mach_id = 0;
-    EXEC SQL SELECT modtime INTO :listname FROM filesys WHERE filsys_id = 0;
 
     machines = create_hash(100);
     while (sq_get_data(machs, &machname)) {
