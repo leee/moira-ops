@@ -1,4 +1,4 @@
-/* $Id: client.c,v 1.26.4.2 2002-08-15 11:46:56 zacheiss Exp $
+/* $Id: client.c,v 1.26.4.3 2002-08-19 18:36:44 zacheiss Exp $
  *
  * This code handles the actual distribution of data files
  * to servers in the Moira server-update program.
@@ -21,7 +21,7 @@
 #include <krb.h>
 #include <krb5.h>
 
-RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/update/client.c,v 1.26.4.2 2002-08-15 11:46:56 zacheiss Exp $");
+RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/update/client.c,v 1.26.4.3 2002-08-19 18:36:44 zacheiss Exp $");
 
 extern des_cblock session;
 extern char *whoami;
@@ -32,6 +32,8 @@ int mr_send_krb5_auth(int conn, char *host_name)
   krb5_data auth;
   int code;
   long response;
+
+  memset(&auth, 0, sizeof(auth));
 
   code = get_mr_krb5_update_ticket(host_name, &auth);
   if (code)
