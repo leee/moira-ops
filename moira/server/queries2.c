@@ -1,4 +1,4 @@
-/* $Id: queries2.c,v 2.88.2.3 2001-08-22 08:07:18 zacheiss Exp $
+/* $Id: queries2.c,v 2.88.2.4 2001-08-22 08:22:43 zacheiss Exp $
  *
  * This file defines the query dispatch table
  *
@@ -813,6 +813,14 @@ static char *ghst_fields[] = {
 
 static char *ghbh_fields[] = {
   "hwaddr",
+  "name", "vendor", "model", "os", "location", "contact", "billing_contact",
+  "account_number", "use", "status", "status_change", "network", "address", 
+  "ace_type", "ace_name", "admin_comment", "ops_comment", "created", "creator",
+  "inuse", "modtime", "modby", "modwith",
+};
+
+static char *ghba_fields[] = {
+  "account_number",
   "name", "vendor", "model", "os", "location", "contact", "billing_contact",
   "account_number", "use", "status", "status_change", "network", "address", 
   "ace_type", "ace_name", "admin_comment", "ops_comment", "created", "creator",
@@ -4492,6 +4500,23 @@ struct query Queries[] = {
     ghbh_fields,
     23,
     "m.hwaddr LIKE LOWER('%s') AND m.mach_id != 0 AND s.snet_id = m.snet_id",
+    1,
+    "m.name",
+    &ghst_validate,
+  },
+
+  {
+    /* Q_GHBA - GET_HOST_BY_ACCOUNT_NUMBER, v8 */
+    "get_host_by_account_number",
+    "ghba",
+    8,
+    RETRIEVE,
+    "m",
+    MACHINE_TABLE,
+    "m.name, m.vendor, m.model, m.os, m.location, m.contact, m.billing_contact, m.account_number, m.use, m.status, TO_CHAR(m.statuschange, 'DD-mon-YYYY HH24:MI:SS'), s.name, m.address, m.owner_type, m.owner_id, m.acomment, m.ocomment, TO_CHAR(m.created, 'DD-mon-YYYY HH24:MI:SS'), m.creator, TO_CHAR(m.inuse, 'DD-mon-YYYY HH24:MI:SS'), TO_CHAR(m.modtime, 'DD-mon-YYYY HH24:MI:SS'), m.modby, m.modwith FROM machine m, subnet s",    
+    ghba_fields,
+    23,
+    "m.account_number LIKE '%s' AND m.mach_id != 0 and s.snet_id = m.snet_id",
     1,
     "m.name",
     &ghst_validate,
