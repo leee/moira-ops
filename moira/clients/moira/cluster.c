@@ -1,4 +1,4 @@
-/* $Id: cluster.c,v 1.51.2.2 2001-08-21 07:19:12 zacheiss Exp $
+/* $Id: cluster.c,v 1.51.2.3 2001-08-22 08:08:12 zacheiss Exp $
  *
  *	This is the file cluster.c for the Moira Client, which allows users
  *      to quickly and easily maintain most parts of the Moira database.
@@ -191,6 +191,8 @@ static char **SetSubnetDefaults(char **info, char *name)
   info[SN_NAME] = strdup(name);
   info[SN_DESC] = strdup("");
   info[SN_STATUS] = strdup("1");
+  info[SN_CONTACT] = strdup(DEFAULT_NONE);
+  info[SN_ACCT_NUMBER] = strdup("");
   sprintf(buf, "%ld", ntohl(inet_addr("18.255.0.0")));
   info[SN_ADDRESS] = strdup(buf);
   sprintf(buf, "%ld", ntohl(inet_addr("255.255.0.0")));
@@ -286,6 +288,22 @@ static char *PrintMachInfo(char **info)
   Put_message(buf);
   sprintf(buf, MOD_FORMAT, info[M_MODBY], info[M_MODTIME], info[M_MODWITH]);
   Put_message(buf);
+  /* Do a get_subnet for the machine's subnet.  We need to know if it's
+   *  Private.
+   */
+  args[0] = info[M_SUBNET];
+  stat = do_mr_query("get_subnet", 1, args, StoreInfo, &elem);
+  if (stat)
+    com_err(program_name, stat, " looking up subnet info");
+  if (atoi(((char **)elem->q_data)[2]) == SNET_STATUS_PRIVATE)
+    {
+      Put_message("");
+      sprintf(buf, "Warning:  This host is on a private subnet.");
+      Put_message(buf);
+      sprintf(buf, "Billing information shown is superceded by billing information for the subnet.");
+      Put_message(buf);
+    }
+
   return info[M_NAME];
 }
 
@@ -391,6 +409,10 @@ static char *PrintSubnetInfo(char **info)
   sprintf(buf, "    Description:  %s", info[SN_DESC]);
   Put_message(buf);
   sprintf(buf, "         Status:  %s", SubnetState(atoi(info[SN_STATUS])));
+  Put_message(buf);
+  sprintf(buf, "        Contact:  %s", info[SN_CONTACT]);
+  Put_message(buf);
+  sprintf(buf, " Account Number:  %s", info[SN_ACCT_NUMBER]);
   Put_message(buf);
   addr.s_addr = htonl(atoi(info[SN_ADDRESS]));
   mask.s_addr = htonl(atoi(info[SN_MASK]));
@@ -711,6 +733,11 @@ char **AskMCDInfo(char **info, int type, Bool name)
 	  for (i = 0; i < 5; i++)
 	    Put_message(subnet_states[i]);
 	}
+      if (GetValueFromUser("Network's contact", &info[SN_CONTACT]) == SUB_ERROR)
+	return NULL;
+      if (GetValueFromUser("Network's billing account number", 
+			   &info[SN_ACCT_NUMBER]) == SUB_ERROR)
+	return NULL;
       if (GetAddressFromUser("Network address", &info[SN_ADDRESS]) == SUB_ERROR)
 	return NULL;
       if (GetAddressFromUser("Network mask", &info[SN_MASK]) == SUB_ERROR)
