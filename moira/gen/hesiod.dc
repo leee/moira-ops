@@ -1,4 +1,4 @@
-/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/hesiod.dc,v 1.4 1991-07-01 16:07:50 mar Exp $
+/* $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/gen/hesiod.dc,v 1.4.1.1 1992-09-14 23:31:32 genoa Exp $
  *
  * This generates the zone files necessary to load a hesiod server.
  * The following zones are generated: passwd, uid, pobox, group,
@@ -63,10 +63,10 @@ char **argv;
     sprintf(hesiod_dir, "%s/hesiod", DCM_DIR);
 
 #ifsql INGRES
-    EXEC SQL CONNECT sms;
+    EXEC SQL CONNECT moira;
 #endsql
 #ifsql INFORMIX
-    EXEC SQL DATABASE sms;
+    EXEC SQL DATABASE moira;
 #endsql
 
     changed = do_passwd();
@@ -114,8 +114,8 @@ get_mach()
 
     machines = create_hash(1000);
     EXEC SQL DECLARE m_cursor CURSOR FOR
-      SELECT NAME, MACH_ID
-	FROM MACHINE;
+      SELECT name, mach_id
+	FROM machine;
     EXEC SQL OPEN m_cursor;
     while (1) {
         EXEC SQL FETCH m_cursor INTO :name, :id;
@@ -302,6 +302,9 @@ do_groups()
     /* make space for group list */
     groups = create_hash(15001);
 
+    /* The following WHENEVER is declarative, not executed,
+     * and applies for the remainder of this file only.
+     */
     EXEC SQL WHENEVER SQLERROR GOTO sqlerr;
 
     /* get lock records */
@@ -350,7 +353,7 @@ do_groups()
     EXEC SQL DECLARE i_cursor CURSOR FOR
       SELECT list_id, member_id
 	FROM imembers
-	  WHERE member_type = "USER";
+	  WHERE member_type = 'USER';
     EXEC SQL OPEN i_cursor;
     while (1) {
 	EXEC SQL FETCH i_cursor INTO :lid, :id;
@@ -511,7 +514,7 @@ do_filsys()
     EXEC SQL DECLARE a_cursor CURSOR FOR
       SELECT name, trans
 	FROM alias
-	  WHERE type = "FILESYS";
+	  WHERE type = 'FILESYS';
     EXEC SQL OPEN a_cursor;
     while (1) {
         EXEC SQL FETCH a_cursor INTO :name, :trans;
@@ -853,7 +856,7 @@ do_palladium()
     EXEC SQL DECLARE a_cursor2 CURSOR FOR
       SELECT name, trans
       FROM alias
-      WHERE type = "PALLADIUM";
+      WHERE type = 'PALLADIUM';
     EXEC SQL OPEN a_cursor2; 
     while (1) { 
         EXEC SQL FETCH a_cursor2 INTO :name, :trans;
@@ -998,7 +1001,7 @@ do_service()
     EXEC SQL DECLARE a_cursor3 CURSOR FOR
       SELECT name, trans
       FROM alias
-      WHERE type = "SERVICE";
+      WHERE type = 'SERVICE';
     EXEC SQL OPEN a_cursor3; 
     while (1) { 
         EXEC SQL FETCH a_cursor3 INTO :service, :altserv;
