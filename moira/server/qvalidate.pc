@@ -1,7 +1,7 @@
 /*
  *	$Source: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v $
  *	$Author: danw $
- *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.1 1997-10-01 22:03:02 danw Exp $
+ *	$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.2 1997-10-01 22:30:29 danw Exp $
  *
  *	Copyright (C) 1987 by the Massachusetts Institute of Technology
  *	For copying and distribution information, please see the file
@@ -10,7 +10,7 @@
  */
 
 #ifndef lint
-static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.1 1997-10-01 22:03:02 danw Exp $";
+static char *rcsid_qsupport_dc = "$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/qvalidate.pc,v 2.3.2.2 1997-10-01 22:30:29 danw Exp $";
 #endif lint
 
 #include <mit-copyright.h>
@@ -37,6 +37,7 @@ int validate_rename(char *argv[], struct valobj *vo);
 int validate_type(char *argv[], struct valobj *vo);
 int validate_typedata(struct query *, char *argv[], struct valobj *vo);
 int validate_len(char *argv[], struct valobj *vo);
+int validate_num(char *argv[], struct valobj *vo);
 int lock_table(struct valobj *vo);
 int readlock_table(struct valobj *vo);
 int convert_wildcards_uppercase(char *arg);
@@ -139,6 +140,12 @@ int validate_fields(q, argv, vo, n)
 	    if (log_flags & LOG_VALID)
 	      com_err(whoami, 0, "validating length: %s", argv[vo->index]);
 	    status = validate_len(argv, vo);
+	    break;
+
+	case V_NUM:
+	    if (log_flags & LOG_VALID)
+	      com_err(whoami, 0, "validating number: %s", argv[vo->index]);
+	    status = validate_num(argv, vo);
 	    break;
 
 	case V_LOCK:
@@ -527,6 +534,20 @@ int readlock_table(vo)
     return(MR_EXISTS);  /* validate_fields expects us to return
                            * this value if everything went okay
                            */
+}
+
+/* Make sure the data is numeric */
+int validate_num(argv, vo)
+    register char *argv[];
+    register struct valobj *vo;
+{
+    char *p = argv[vo->index];
+    
+    if (*p == '-') p++;
+    for (;*p;p++)
+        if (*p < '0' || *p > '9') return MR_INTEGER;
+    
+    return MR_EXISTS;
 }
 
 /* Check the database at startup time. */
