@@ -1,6 +1,6 @@
 /* This file defines the query dispatch table for version 2 of the protocol
  *
- * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.28 1997-09-10 03:40:25 danw Exp $
+ * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.28.2.1 1997-10-01 22:02:59 danw Exp $
  *
  * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
  * For copying and distribution information, please see the file
@@ -178,10 +178,6 @@ int num_tables = 27;
  * situations
  */
 
-static struct valobj VOsort0[] = {
-  {V_SORT, 0},
-};
-
 static struct valobj VOwild0[] = {
   {V_WILD, 0},
 };
@@ -190,34 +186,15 @@ static struct valobj VOupwild0[] = {
   {V_UPWILD, 0},
 };
 
-static struct valobj VOwild0sort[] = {
-  {V_WILD, 0},
-  {V_SORT, 0},
-};
-
-static struct valobj VOupwild0sort[] = {
-  {V_UPWILD, 0},
-  {V_SORT, 0},
-};
-
-static struct valobj VOwild01sort0[] = {
+static struct valobj VOwild01[] = {
   {V_WILD, 0},
   {V_WILD, 1},
-  {V_SORT, 0},
 };
 
-static struct valobj VOwild01sort01[] = {
-  {V_WILD, 0},
-  {V_WILD, 1},
-  {V_SORT, 0},
-  {V_SORT, 1}, 
-};
-
-static struct valobj VOwild012sort0[] = {  /* get_alias */
+static struct valobj VOwild012[] = {
   {V_WILD, 0},
   {V_WILD, 1},
   {V_WILD, 2},
-  {V_SORT, 0},
 };
 
 
@@ -265,10 +242,22 @@ static struct valobj VOfilsys0user1[] = {
 static struct validate VDmach = { VOmach0, 1 };
 static struct validate VDwild0= { VOwild0, 1 };
 static struct validate VDupwild0= { VOupwild0, 1 };
-static struct validate VDwild2sort2 = { VOwild01sort01,4 };
-static struct validate VDwild3sort1 = { VOwild012sort0,4 };
-static struct validate VDsortf = { 
-  VOsort0,
+static struct validate VDwild2 = { VOwild01,2 };
+static struct validate VDwild3 = { VOwild012,3 };
+static struct validate VDfixmodby = { 
+  0
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  followup_fix_modby,
+};
+
+static struct validate VDwildfixmodby = { 
+  VOwild0,
   1,
   0,
   0,
@@ -279,9 +268,9 @@ static struct validate VDsortf = {
   followup_fix_modby,
 };
 
-static struct validate VDwildsortf = { 
-  VOwild0sort,
-  2,
+static struct validate VDupwildfixmodby = {
+  VOupwild0,
+  1,
   0,
   0,
   0,
@@ -290,20 +279,7 @@ static struct validate VDwildsortf = {
   0,
   followup_fix_modby,
 };
-static struct validate VDsort0= { VOsort0, 1 };
 
-
-static struct validate VDupwildsortf = {
-  VOupwild0sort,
-  2,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  followup_fix_modby,
-};
 /* Query data */
 
 static char *galo_fields[] = {
@@ -324,8 +300,8 @@ static char *gubl_fields[] = {
 
 static struct validate gubl_validate =	
 {
-  VOwild0sort,
-  2,
+  VOwild0,
+  1,
   0,
   0,
   0,
@@ -349,8 +325,8 @@ static char *guan_fields[] = {
 
 static struct validate guan_validate =	
 {
-  VOwild01sort01,
-  4,
+  VOwild01,
+  2,
   0,
   0,
   0,
@@ -380,8 +356,8 @@ static char *gubu_fields[] = {
 
 static struct validate gubu_validate =	
 {
-  VOsort0,
-  1,
+  0,
+  0,
   0,
   0,
   0,
@@ -399,8 +375,8 @@ static char *gubn_fields[] = {
 
 static struct validate gubn_validate =
 {
-  VOwild01sort0,
-  3,
+  VOwild01,
+  2,
   0,
   0,
   0,
@@ -860,12 +836,11 @@ static struct valobj ghst_valobj[] = {
   {V_UPWILD, 1},
   {V_UPWILD, 2},
   {V_UPWILD, 3},
-  {V_SORT, 0},
 };
 
 static struct validate ghst_validate = { 
   ghst_valobj,
-  5,
+  4,
   0,
   0,
   0,
@@ -983,12 +958,11 @@ static char *ghal_fields[] = {
 static struct valobj ghal_valobj[] = {
   {V_UPWILD, 0},
   {V_UPWILD, 1},
-  {V_SORT, 0},
 };
 
 static struct validate ghal_validate = {
   ghal_valobj,
-  3,
+  2,
   0,
   0,
   0,
@@ -1045,12 +1019,11 @@ static struct valobj gsnt_valobj[] = {
   {V_RLOCK, 0, SUBNET_TABLE, 0, SNET_ID, MR_DEADLOCK},
   {V_RLOCK, 0, LIST_TABLE, 0, LIST_ID, MR_DEADLOCK},
   {V_UPWILD, 0},
-  {V_SORT, 0},
 };
 
 static struct validate gsnt_validate = {
   gsnt_valobj,
-  5,
+  4,
   0,
   0,
   0,
@@ -1219,11 +1192,9 @@ static struct valobj gmcm_valobj[] =
 {
   {V_UPWILD, 0},
   {V_WILD, 1},
-  {V_SORT, 0},
-  {V_SORT, 1},
 };
 
-static struct validate gmcm_validate = { gmcm_valobj, 4 };
+static struct validate gmcm_validate = { gmcm_valobj, 2 };
 
 static struct valobj amtc_valobj[] =	/* ADD_MACHINE_TO_CLUSTER */
 {					/* DELETE_MACHINE_FROM_CLUSTER */
@@ -1526,12 +1497,11 @@ static struct valobj glom_valobj[] = {
    {V_RLOCK, 0, LIST_TABLE, 0, LIST_ID, MR_DEADLOCK},
    {V_TYPE, 0, 0, "rmember", 0, MR_TYPE},
    {V_TYPEDATA, 1, 0, 0, 0, MR_NO_MATCH},
-   {V_SORT, 0},
 };
 
 static struct validate glom_validate = {
   glom_valobj,
-  6,
+  5,
   0,
   0,
   0,
@@ -2018,13 +1988,11 @@ static char *gfgm_fields[] = {
 
 static struct valobj gfgm_valobj[] = {
   {V_ID, 0, FILESYS_TABLE, LABEL, FILSYS_ID, MR_FILESYS},
-  {V_SORT, 1},
-  {V_SORT, 0},
 };
 
 static struct validate gfgm_validate = {
   gfgm_valobj,
-  3,
+  1,
   0,
   0,
   0,
@@ -2154,12 +2122,11 @@ static struct valobj gqot_valobj[] = {
   {V_WILD, 0},
   {V_TYPE, 1, 0, QUOTA_TYPE, 0, MR_TYPE},
   {V_TYPEDATA, 2, 0, 0, 0, MR_ACE},
-  {V_SORT, 0, 0, 0, 0, 0},
 };
 
 static struct validate gqot_validate = {
   gqot_valobj,
-  9,
+  8,
   0,
   0,
   0,
@@ -2175,8 +2142,8 @@ static char *gqbf_fields[] = {
 };
 
 static struct validate gqbf_validate = {
-  VOwild0sort,
-  2,
+  VOwild0,
+  1,
   0,
   0,
   0,
@@ -2243,8 +2210,8 @@ static char *gnfq_fields[] = {
 };
 
 static struct validate gnfq_validate = {
-  VOwild0sort,
-  2,
+  VOwild0,
+  1,
   0,
   0,
   0,
@@ -2317,11 +2284,10 @@ static struct valobj gzcl_valobj[] = {
   {V_RLOCK, 0, LIST_TABLE, 0, LIST_ID, MR_DEADLOCK},
   {V_RLOCK, 0, ZEPHYR_TABLE, 0, ZEPH_ID, MR_DEADLOCK},
   {V_WILD, 0},
-  {V_SORT, 0},
 };
 static struct validate gzcl_validate = {
   gzcl_valobj,
-  5,
+  4,
   0,
   0,
   0,
@@ -2489,12 +2455,11 @@ static struct valobj gpce_valobj[]={
   {V_RLOCK, 0, MACHINE_TABLE, 0, MACH_ID, MR_DEADLOCK},
   {V_RLOCK, 0, PRINTCAP_TABLE, 0, MACH_ID, MR_DEADLOCK},
   {V_WILD, 0},
-  {V_SORT, 0},
 };
 
 static struct validate gpce_validate = {
   gpce_valobj,
-  5,
+  4,
   0,
   0,
   0,
@@ -2714,7 +2679,8 @@ struct query Queries2[] = {
     6,
     "u.users_id != 0",
     0,
-    &VDsort0,
+    "u.login",
+    0,
   },
   
   {
@@ -2729,7 +2695,8 @@ struct query Queries2[] = {
     6,
     "u.status = 1",
     0,
-    &VDsort0,
+    "u.login",
+    0,
   },
   
   {
@@ -2744,6 +2711,7 @@ struct query Queries2[] = {
     15,
     "u.login LIKE '%s' ESCAPE '*' AND u.users_id != 0 AND u.comments = str.string_id",
     1,
+    "u.login",
     &gubl_validate,
   },
   
@@ -2759,6 +2727,7 @@ struct query Queries2[] = {
     15,
     "u.unix_uid = %s AND u.users_id != 0 AND u.comments = str.string_id",
     1,
+    "u.login",
     &gubu_validate,
   },
   
@@ -2774,6 +2743,7 @@ struct query Queries2[] = {
     15,
     "u.first LIKE '%s' ESCAPE '*' AND u.last LIKE '%s' ESCAPE '*' AND u.users_id != 0 and u.comments = str.string_id",
     2,
+    "u.last, u.first",
     &guan_validate,
   },
   
@@ -2789,7 +2759,8 @@ struct query Queries2[] = {
     15,
     "u.type = UPPER('%s') AND u.users_id != 0 AND u.comments = str.string_id",
     1,
-    &VDsortf,
+    "u.login",
+    &VDfixmodby,
   },
   
   {
@@ -2804,7 +2775,8 @@ struct query Queries2[] = {
     15,
     "u.clearid LIKE '%s' ESCAPE '*' AND u.users_id != 0 AND u.comments = str.string_id",
     1,
-    &VDwildsortf,
+    "u.login",
+    &VDwildfixmodby,
   },
   
   {
@@ -2819,6 +2791,7 @@ struct query Queries2[] = {
     12,
     "u.login LIKE '%s' ESCAPE '*' AND u.users_id != 0",
     1,
+    "u.login",
     &gubl_validate,
   },
   
@@ -2834,6 +2807,7 @@ struct query Queries2[] = {
     12,
     "u.unix_uid = %s AND u.users_id != 0",
     1,
+    "u.login",
     &gubu_validate,
   },
   
@@ -2849,6 +2823,7 @@ struct query Queries2[] = {
     12,
     "u.first LIKE '%s' ESCAPE '*' AND u.last LIKE '%s' ESCAPE '*' AND u.users_id != 0",
     2,
+    "u.last, u.first",
     &gubn_validate,
   },
   
@@ -2864,7 +2839,8 @@ struct query Queries2[] = {
     12,
     "u.type = UPPER('%s') AND u.users_id != 0",
     1,
-    &VDsortf,
+    "u.login",
+    &VDfixmodby,
   },
   
   {
@@ -2879,7 +2855,8 @@ struct query Queries2[] = {
     12,
     "u.clearid LIKE '%s' ESCAPE '*' AND u.users_id != 0",
     1,
-    &VDwildsortf,
+    "u.login",
+    &VDwildfixmodby,
   },
   
   {
@@ -2894,6 +2871,7 @@ struct query Queries2[] = {
     2,
     "u.users_id = %d",
     1,
+    0,
     &gudf_validate,
   },
 
@@ -2909,6 +2887,7 @@ struct query Queries2[] = {
     12,
     (char *)0,
     0,
+    0,
     &auac_validate,
   },
   
@@ -2922,6 +2901,7 @@ struct query Queries2[] = {
     "INTO users (login, unix_uid, shell, last, first, middle, status, clearid, type, comments, signature, secure, users_id) VALUES ('%s', %s, '%s', NVL('%s',CHR(0)), NVL('%s',CHR(0)), NVL('%s',CHR(0)), %s, NVL('%s',CHR(0)), '%s', 0, CHR(0), 0, %s)",
     auac_fields,
     9,
+    0,
     0,
     0,
     &ausr_validate,
@@ -2939,6 +2919,7 @@ struct query Queries2[] = {
     3,
     0,
     0,
+    0,
     &rusr_validate,
   },
   
@@ -2954,6 +2935,7 @@ struct query Queries2[] = {
     12,
     "users_id = %d",
     1,
+    0,
     &uuac_validate,
   },
  
@@ -2969,6 +2951,7 @@ struct query Queries2[] = {
     9,
     "users_id = %d",
     1,
+    0,
     &uusr_validate,
   },
 
@@ -2984,6 +2967,7 @@ struct query Queries2[] = {
     1,
     "users_id = %d",
     1,
+    0,
     &uush_validate,
   },
 
@@ -2999,6 +2983,7 @@ struct query Queries2[] = {
     1,
     "users_id = %d",
     1,
+    0,
     &uust_validate,
   },
 
@@ -3014,6 +2999,7 @@ struct query Queries2[] = {
     1,
     "users_id = %d",
     1,
+    0,
     &uust_validate,
   },
  
@@ -3029,6 +3015,7 @@ struct query Queries2[] = {
     2,
     "users_id = %d",
     1,
+    0,
     &uudf_validate,
   },
 
@@ -3044,6 +3031,7 @@ struct query Queries2[] = {
     0,
     "users_id = %d",
     1,
+    0,
     &dusr_validate,
   },
 
@@ -3059,6 +3047,7 @@ struct query Queries2[] = {
     0,
     "users_id = %d",
     1,
+    0,
     &dubu_validate,
   },
 
@@ -3074,7 +3063,8 @@ struct query Queries2[] = {
     2,
     "u.login LIKE '%s' ESCAPE '*' AND str.string LIKE '%s' ESCAPE '*' AND km.users_id = u.users_id AND km.string_id = str.string_id",
     2,
-    &VDwild2sort2,
+    "u.login",
+    &VDwild2,
   },
 
   {
@@ -3087,6 +3077,7 @@ struct query Queries2[] = {
     "INTO krbmap (users_id, string_id) VALUES (%d, %d)",
     akum_fields,
     2,
+    0,
     0,
     0,
     &akum_validate,
@@ -3104,6 +3095,7 @@ struct query Queries2[] = {
     0,
     "users_id = %d AND string_id = %d",
     2,
+    0,
     &dkum_validate,
   },
 
@@ -3119,6 +3111,7 @@ struct query Queries2[] = {
     12,
     "users_id = %d",
     1,
+    0,
     &gfbl_validate,
   },
 
@@ -3134,6 +3127,7 @@ struct query Queries2[] = {
     8,
     "users_id = %d",
     1,
+    0,
     &ufbl_validate,
   },
 
@@ -3149,6 +3143,7 @@ struct query Queries2[] = {
     6,
     "users_id = %d",
     1,
+    0,
     &gpob_validate,
   },
 
@@ -3164,6 +3159,7 @@ struct query Queries2[] = {
     3,
     "potype != 'NONE'",
     0,
+    "u.login",
     &gpox_validate,
   },
       
@@ -3179,6 +3175,7 @@ struct query Queries2[] = {
     3,
     "potype = 'POP'",
     0,
+    "u.login",
     &gpox_validate
   },
 
@@ -3194,6 +3191,7 @@ struct query Queries2[] = {
     3,
     "potype = 'SMTP'",
     0,
+    "u.login",
     &gpox_validate
   },
 
@@ -3208,6 +3206,7 @@ struct query Queries2[] = {
     spob_fields,
     3,
     (char *)0,
+    0,
     0,
     &spob_validate,
   },
@@ -3224,6 +3223,7 @@ struct query Queries2[] = {
     0,
     "users_id = %d",
     1,
+    0,
     &spop_validate,
   },
 
@@ -3239,6 +3239,7 @@ struct query Queries2[] = {
     0,
     "users_id = %d",
     1,
+    0,
     &dpob_validate,
   },
 
@@ -3254,6 +3255,7 @@ struct query Queries2[] = {
     21,
     "m.name LIKE '%s' ESCAPE '*' AND m.address LIKE '%s' ESCAPE '*' AND m.location LIKE '%s' ESCAPE '*' AND s.name LIKE '%s' ESCAPE '*' AND m.mach_id != 0 AND s.snet_id = m.snet_id", 
     4,
+    "m.name",
     &ghst_validate,
   },
 
@@ -3267,6 +3269,7 @@ struct query Queries2[] = {
     "INTO machine (name, vendor, model, os, location, contact, use, status, statuschange, snet_id, address, owner_type, owner_id, acomment, ocomment, created, inuse, mach_id, creator) VALUES (UPPER('%s'),NVL(UPPER('%s'),CHR(0)),NVL(UPPER('%s'),CHR(0)),NVL(UPPER('%s'),CHR(0)),NVL(UPPER('%s'),CHR(0)),NVL('%s',CHR(0)),%s,%s,SYSDATE,%d,'%s','%s',%d,%d,%d,SYSDATE,SYSDATE,%s,%s)",
     ahst_fields,
     14,
+    0,
     0,
     0,
     &ahst_validate,
@@ -3284,6 +3287,7 @@ struct query Queries2[] = {
     14,
     "mach_id = %d",
     1,
+    0,
     &uhst_validate,
   },
 
@@ -3299,6 +3303,7 @@ struct query Queries2[] = {
     0,
     "mach_id = %d",
     1,
+    0,
     &dhst_validate,
   },
 
@@ -3314,7 +3319,8 @@ struct query Queries2[] = {
     5,
     "name LIKE '%s' ESCAPE '*' AND mach_id != 0", 
     1,
-    &VDupwildsortf,
+    "m.name",
+    &VDupwildfixmodby,
   },
 
   {
@@ -3329,6 +3335,7 @@ struct query Queries2[] = {
     2,
     "m.mach_id = a.mach_id and a.name LIKE '%s' ESCAPE '*' AND m.name LIKE '%s' ESCAPE '*'",
     2,
+    "m.name, a.name",
     &ghal_validate,
   },
 
@@ -3342,6 +3349,7 @@ struct query Queries2[] = {
     "INTO hostalias (name, mach_id) VALUES (UPPER('%s'),%d)",
     ghal_fields,
     2,
+    0,
     0,
     0,
     &ahal_validate,
@@ -3359,6 +3367,7 @@ struct query Queries2[] = {
     0,
     "name = UPPER('%s') AND mach_id = %d",
     2,
+    0,
     &dhal_validate,
   },
 
@@ -3374,6 +3383,7 @@ struct query Queries2[] = {
     12,
     "name LIKE '%s' ESCAPE '*' and snet_id != 0",
     1,
+    "name",
     &gsnt_validate,
   },
 
@@ -3387,6 +3397,7 @@ struct query Queries2[] = {
     "INTO subnet (name, description, saddr, mask, low, high, prefix, owner_type, owner_id, snet_id) VALUES (UPPER('%s'), NVL('%s',CHR(0)), %s, %s, %s, %s, NVL('%s',CHR(0)), '%s', %d, %s)",
     asnt_fields,
     9,
+    0,
     0,
     0,
     &asnt_validate,
@@ -3404,6 +3415,7 @@ struct query Queries2[] = {
     9,
     "snet_id = %d",
     1,
+    0,
     &usnt_validate,
   },
 
@@ -3419,6 +3431,7 @@ struct query Queries2[] = {
     0,
     "snet_id = %d",
     1,
+    0,
     &dsnt_validate,
   },
 
@@ -3434,7 +3447,8 @@ struct query Queries2[] = {
     6,
     "name LIKE '%s' ESCAPE '*' AND clu_id != 0",
     1,
-    &VDwildsortf,
+    "name",
+    &VDwildfixmodby,
   },
 
   {
@@ -3447,6 +3461,7 @@ struct query Queries2[] = {
     "INTO clusters (name, description, location, clu_id) VALUES ('%s',NVL('%s',CHR(0)),NVL('%s',CHR(0)),%s)",
     aclu_fields,
     3,
+    0,
     0,
     0,
     &aclu_validate,
@@ -3464,6 +3479,7 @@ struct query Queries2[] = {
     3,
     "clu_id = %d",
     1,
+    0,
     &uclu_validate,
   },
 
@@ -3479,6 +3495,7 @@ struct query Queries2[] = {
     0,
     "clu_id = %d",
     1,
+    0,
     &dclu_validate,
   },
 
@@ -3494,6 +3511,7 @@ struct query Queries2[] = {
     2,
     "m.name LIKE '%s' ESCAPE '*' AND c.name LIKE '%s' ESCAPE '*' AND mcm.clu_id = c.clu_id AND mcm.mach_id = m.mach_id",
     2,
+    "m.name, c.name",
     &gmcm_validate, 
   },
                                            
@@ -3507,6 +3525,7 @@ struct query Queries2[] = {
     "INTO mcmap (mach_id, clu_id) VALUES (%d, %d)",
     gmcm_fields,
     2,
+    0,
     0,
     0,
     &amtc_validate,
@@ -3524,6 +3543,7 @@ struct query Queries2[] = {
     0,
     "mach_id = %d AND clu_id = %d",
     2,
+    0,
     &amtc_validate,
   },
 
@@ -3539,7 +3559,8 @@ struct query Queries2[] = {
     3,
     "c.clu_id = svc.clu_id AND c.name LIKE '%s' ESCAPE '*' AND svc.serv_label LIKE '%s' ESCAPE '*'",
     2,
-    &VDwild2sort2,
+    "c.name, svc.serv_label, svc.serv_cluster",
+    &VDwild2,
   },
 
   {
@@ -3553,6 +3574,7 @@ struct query Queries2[] = {
     acld_fields,
     3,
     (char *)0,
+    0,
     0,
     &acld_validate,
   },
@@ -3569,6 +3591,7 @@ struct query Queries2[] = {
     0,
     "clu_id = %d AND serv_label = '%s' AND serv_cluster = '%s'",   
     3,
+    0,
     &dcld_validate,
   },
 
@@ -3584,6 +3607,7 @@ struct query Queries2[] = {
     13,
     0,
     1,              
+    0,
     &glin_validate, 
   },
     
@@ -3599,6 +3623,7 @@ struct query Queries2[] = {
     1,
     "name LIKE '%s' ESCAPE '*' AND list_id != 0",
     1,
+    "name",
     &VDwild0,
   },
     
@@ -3612,6 +3637,7 @@ struct query Queries2[] = {
     "INTO list (name, active, publicflg, hidden, maillist, grouplist, gid, acl_type, acl_id, description, list_id) VALUES ('%s',%s,%s,%s,%s,%s,%s,'%s',%d,NVL('%s',CHR(0)),%s)",
     alis_fields,
     10,
+    0,
     0,
     0,
     &alis_validate,
@@ -3629,6 +3655,7 @@ struct query Queries2[] = {
     10,
     "list_id = %d",
     1,
+    0,
     &ulis_validate,
   },
 
@@ -3644,6 +3671,7 @@ struct query Queries2[] = {
     0,
     "list_id = %d",
     1,
+    0,
     &dlis_validate,
   },
 
@@ -3658,6 +3686,7 @@ struct query Queries2[] = {
     amtl_fields,
     3,
     (char *)0,
+    0,
     0,
     &amtl_validate,
   },
@@ -3674,6 +3703,7 @@ struct query Queries2[] = {
     0,
     0,
     3,
+    0,
     &dmfl_validate,
   },
 
@@ -3689,6 +3719,7 @@ struct query Queries2[] = {
     2,
     0,
     2,
+    0,
     &gaus_validate,
   },
 
@@ -3704,6 +3735,7 @@ struct query Queries2[] = {
     1,
     0,
     5,
+    0,
     &qgli_validate,
   },
 
@@ -3719,6 +3751,7 @@ struct query Queries2[] = {
     2,
     (char *)0,
     1,
+    0,
     &gmol_validate,
   },
 
@@ -3734,6 +3767,7 @@ struct query Queries2[] = {
     0,
     (char *)0,
     1,
+    0,
     &geml_validate,
   },
  
@@ -3749,6 +3783,7 @@ struct query Queries2[] = {
     6,
     0,
     2,
+    0,
     &glom_validate,
   },
 
@@ -3764,6 +3799,7 @@ struct query Queries2[] = {
     1,
     0,
     1,
+    0,
     &cmol_validate,
   },
 
@@ -3779,6 +3815,7 @@ struct query Queries2[] = {
     16,
     "name LIKE '%s' ESCAPE '*'",
     1,
+    "name",
     &gsin_validate,
   },
 
@@ -3794,6 +3831,7 @@ struct query Queries2[] = {
     1,
     0,
     3,
+    0,
     &qgsv_validate,
   },
 
@@ -3808,6 +3846,7 @@ struct query Queries2[] = {
     asin_fields,
     8,
     (char *)0,
+    0,
     0,
     &asin_validate,
   },
@@ -3824,6 +3863,7 @@ struct query Queries2[] = {
     7,
     "name = UPPER('%s')",
     1,
+    0,
     &asin_validate,
   },
 
@@ -3839,6 +3879,7 @@ struct query Queries2[] = {
     0,
     "name = UPPER('%s')",
     1,
+    0,
     &rsve_validate,
   },
 
@@ -3854,6 +3895,7 @@ struct query Queries2[] = {
     5,
     "name = UPPER('%s')",
     1,
+    0,
     &ssif_validate,
   },
 
@@ -3869,6 +3911,7 @@ struct query Queries2[] = {
     0,
     "name = UPPER('%s')",
     1,
+    0,
     &dsin_validate,
   },
 
@@ -3884,6 +3927,7 @@ struct query Queries2[] = {
     16,
     "sh.service LIKE '%s' ESCAPE '*' AND m.name LIKE '%s' ESCAPE '*' AND m.mach_id = sh.mach_id",
     2,
+    0,
     &gshi_validate,
   },
 
@@ -3899,6 +3943,7 @@ struct query Queries2[] = {
     2,
     0,
     6,
+    0,
     &qgsh_validate,
   },
 
@@ -3913,6 +3958,7 @@ struct query Queries2[] = {
     ashi_fields,
     6,
     (char *)0,
+    0,
     0,
     &ashi_validate,
   },
@@ -3929,6 +3975,7 @@ struct query Queries2[] = {
     4,
     "service = UPPER('%s') AND mach_id = %d",
     2,
+    0,
     &ashi_validate,
   },
 
@@ -3944,6 +3991,7 @@ struct query Queries2[] = {
     0,
     "service = UPPER('%s') AND mach_id = %d",
     2,
+    0,
     &rshe_validate,
   },
 
@@ -3959,6 +4007,7 @@ struct query Queries2[] = {
     0,
     "service = UPPER('%s') AND mach_id = %d",
     2,
+    0,
     &ssho_validate,
   },
 
@@ -3974,6 +4023,7 @@ struct query Queries2[] = {
     7,
     "service = UPPER('%s') AND mach_id = %d", 
     2,
+    0,
     &sshi_validate,
   },
 
@@ -3989,6 +4039,7 @@ struct query Queries2[] = {
     0,
     "service = UPPER('%s') AND mach_id = %d",
     2,
+    0,
     &dshi_validate,
   },
 
@@ -4004,6 +4055,7 @@ struct query Queries2[] = {
     2,
     "sh.service LIKE '%s' ESCAPE '*' AND sh.mach_id = m.mach_id",
     1,
+    "sh.service, m.name",
     &VDupwild0,
   },
 
@@ -4019,7 +4071,8 @@ struct query Queries2[] = {
     14,
     "fs.label LIKE '%s' ESCAPE '*' AND fs.mach_id = m.mach_id AND fs.owner = u.users_id AND fs.owners = l.list_id",
     1,
-    &VDwildsortf,
+    "fs.label",
+    &VDwildfixmodby,
   },
 
   {
@@ -4034,6 +4087,7 @@ struct query Queries2[] = {
     14,
     "fs.mach_id = %d AND m.mach_id = fs.mach_id AND fs.owner = u.users_id AND fs.owners = l.list_id",
     1,
+    "fs.label",
     &gfsm_validate,
   },
 
@@ -4049,6 +4103,7 @@ struct query Queries2[] = {
     14,
     "fs.mach_id = %d AND m.mach_id = fs.mach_id AND fs.owner = u.users_id AND fs.owners = l.list_id AND np.nfsphys_id = fs.phys_id AND np.dir LIKE '%s' ESCAPE '*' AND fs.type = 'NFS'", 
     2,
+    "fs.label",
     &gfsn_validate,
   },
 
@@ -4064,6 +4119,7 @@ struct query Queries2[] = {
     14,
     "fs.owners = %d AND m.mach_id = fs.mach_id AND fs.owner = u.users_id AND fs.owners = l.list_id",
     1,
+    "fs.label",
     &gfsg_validate,
   },
 
@@ -4079,7 +4135,8 @@ struct query Queries2[] = {
     14,
     "fs.name LIKE '%s' ESCAPE '*' AND m.mach_id = fs.mach_id AND fs.owner = u.users_id AND fs.owners = list_id",
     1,
-    &VDwildsortf,
+    "fs.label",
+    &VDwildfixmodby,
   },
  
   {
@@ -4092,6 +4149,7 @@ struct query Queries2[] = {
     "INTO filesys (label, type, mach_id, name, mount, rwaccess, comments, owner, owners, createflg, lockertype, filsys_id) VALUES ('%s','%s',%d,NVL('%s',CHR(0)),'%s','%s',NVL('%s',CHR(0)),%d,%d,%s,'%s',%s)",
     afil_fields,
     11,
+    0,
     0,
     0,
     &afil_validate,
@@ -4109,6 +4167,7 @@ struct query Queries2[] = {
     11,
     "filsys_id = %d",
     1,
+    0,
     &ufil_validate,      
   },
 
@@ -4124,6 +4183,7 @@ struct query Queries2[] = {
     0,
     "filsys_id = %d",
     1,
+    0,
     &dfil_validate,
   },
 
@@ -4139,6 +4199,7 @@ struct query Queries2[] = {
     2,
     "fg.group_id = %d AND fs.filsys_id = fg.filsys_id",
     1,
+    "fg.key, fs.label",
     &gfgm_validate,
   },
 
@@ -4153,6 +4214,7 @@ struct query Queries2[] = {
     gfgm_fields,
     3,
     (char *)0,
+    0,
     0,
     &aftg_validate,
   },
@@ -4169,6 +4231,7 @@ struct query Queries2[] = {
     0,
     "group_id = %d AND filsys_id = %d",
     2,
+    0,
     &aftg_validate,
   },
 
@@ -4184,7 +4247,8 @@ struct query Queries2[] = {
     9,
     "m.mach_id = np.mach_id",
     0,
-    &VDsortf,
+    "m.name, np.dir",
+    &VDfixmodby,
   },
 
   {
@@ -4199,6 +4263,7 @@ struct query Queries2[] = {
     9,
     "np.mach_id = %d AND np.dir LIKE '%s' ESCAPE '*' AND m.mach_id = np.mach_id", 
     2,
+    "m.name, np.dir",
     &gnfp_validate,
   },
 
@@ -4212,6 +4277,7 @@ struct query Queries2[] = {
     "INTO nfsphys (mach_id, dir, device, status, allocated, partsize, nfsphys_id) VALUES (%d, '%s', NVL('%s',CHR(0)), %s, %s, %s, %s)",
     ganf_fields,
     6,
+    0,
     0,
     0,
     &anfp_validate,
@@ -4229,6 +4295,7 @@ struct query Queries2[] = {
     4,
     "mach_id = %d AND dir = '%s'", 
     2,
+    0,
     &unfp_validate,
   },
 
@@ -4244,6 +4311,7 @@ struct query Queries2[] = {
     1,
     "mach_id = %d AND dir = '%s'",
     2,
+    0,
     &unfp_validate,
   },
 
@@ -4259,6 +4327,7 @@ struct query Queries2[] = {
     0,
     "mach_id = %d AND dir = '%s'",
     2,
+    0,
     &dnfp_validate,
   },
 
@@ -4274,6 +4343,7 @@ struct query Queries2[] = {
     9,
     "fs.label LIKE '%s' ESCAPE '*' AND q.type = '%s' AND q.entity_id = %d AND fs.filsys_id = q.filsys_id AND m.mach_id = fs.mach_id",
     3,
+    "fs.label",
     &gqot_validate,
   },
 
@@ -4289,6 +4359,7 @@ struct query Queries2[] = {
     9,
     "fs.label LIKE '%s' ESCAPE '*' AND fs.filsys_id = q.filsys_id AND m.mach_id = fs.mach_id",
     1,
+    "fs.label, q.type",
     &gqbf_validate,
   },
 
@@ -4303,6 +4374,7 @@ struct query Queries2[] = {
     aqot_fields,
     4,
     (char *)0,
+    0,
     0,
     &aqot_validate,
   },
@@ -4319,6 +4391,7 @@ struct query Queries2[] = {
     1,
     0,
     3,
+    0,
     &uqot_validate,
   },
 
@@ -4334,6 +4407,7 @@ struct query Queries2[] = {
     0,
     0,
     3,
+    0,
     &dqot_validate,
   },
 
@@ -4349,6 +4423,7 @@ struct query Queries2[] = {
     8,
     "fs.label LIKE '%s' ESCAPE '*' AND q.type = 'USER' AND q.entity_id = u.users_id AND fs.filsys_id = q.filsys_id AND m.mach_id = fs.mach_id AND u.login = '%s'",
     2,
+    "fs.label, u.login",
     &gnfq_validate,
   },
 
@@ -4364,6 +4439,7 @@ struct query Queries2[] = {
     5,
     "np.mach_id = %d AND np.dir LIKE '%s' ESCAPE '*' AND q.phys_id = np.nfsphys_id AND fs.filsys_id = q.filsys_id AND q.type = 'USER' AND u.users_id = q.entity_id AND m.mach_id = np.mach_id",
     2,
+    "fs.label, np.dir, u.login",
     &gnqp_validate,
   },
 
@@ -4378,6 +4454,7 @@ struct query Queries2[] = {
     anfq_fields,
     3,
     (char *)0,
+    0,
     0,
     &anfq_validate,
   },
@@ -4394,6 +4471,7 @@ struct query Queries2[] = {
     1,
     0,
     2,
+    0,
     &unfq_validate,
   },
 
@@ -4409,6 +4487,7 @@ struct query Queries2[] = {
     0,
     0,
     2,
+    0,
     &dnfq_validate,
   },
 
@@ -4424,6 +4503,7 @@ struct query Queries2[] = {
     12,
     "class LIKE '%s' ESCAPE '*'",
     1,
+    "class",
     &gzcl_validate,
   },
 
@@ -4437,6 +4517,7 @@ struct query Queries2[] = {
     "INTO zephyr (class, xmt_type, xmt_id, sub_type, sub_id, iws_type, iws_id, iui_type, iui_id) VALUES ('%s','%s',%d,'%s',%d,'%s',%d,'%s',%d)",
     azcl_fields,
     9,
+    0,
     0,
     0,
     &azcl_validate,
@@ -4454,6 +4535,7 @@ struct query Queries2[] = {
     9,
     "class = '%s'",
     1,
+    0,
     &uzcl_validate,
   },    
 
@@ -4469,6 +4551,7 @@ struct query Queries2[] = {
     0,
     "class = '%s'",
     1,
+    0,
     &dzcl_validate,
   },    
 
@@ -4484,6 +4567,7 @@ struct query Queries2[] = {
     6,
     "m.name LIKE '%s' ESCAPE '*' AND ha.mach_id = m.mach_id",
     1,
+    "m.name",
     &gsha_validate,
   },
 
@@ -4497,6 +4581,7 @@ struct query Queries2[] = {
     "INTO hostaccess (mach_id, acl_type, acl_id) VALUES (%d,'%s',%d)",
     asha_fields,
     3,
+    0,
     0,
     0,
     &asha_validate,
@@ -4514,6 +4599,7 @@ struct query Queries2[] = {
     2,
     "mach_id = %d",
     1,
+    0,
     &asha_validate,
   },
 
@@ -4529,6 +4615,7 @@ struct query Queries2[] = {
     0,
     "mach_id = %d",
     1,
+    0,
     &VDmach,
   },
 
@@ -4544,7 +4631,8 @@ struct query Queries2[] = {
     7,
     "name LIKE '%s' ESCAPE '*'",
     1,
-    &VDwildsortf,
+    "name, protocol",
+    &VDwildfixmodby,
   },
 
   {
@@ -4558,6 +4646,7 @@ struct query Queries2[] = {
     asvc_fields,
     4,
     (char *)0,
+    0,
     0,
     &asvc_validate,
   },
@@ -4574,6 +4663,7 @@ struct query Queries2[] = {
     0,
     "name = '%s'",
     1,
+    0,
     &asvc_validate,
   },
 
@@ -4589,6 +4679,7 @@ struct query Queries2[] = {
     11,
     "pc.name LIKE '%s' ESCAPE '*' AND m.mach_id = pc.mach_id",
     1,
+    "pc.name",
     &gpce_validate,
   },
 
@@ -4602,6 +4693,7 @@ struct query Queries2[] = {
     "INTO printcap (name, mach_id, dir, rp, quotaserver, auth, price, comments) VALUES ('%s',%d,'%s','%s',%d,%s,%s,NVL('%s',CHR(0)))",
     apce_fields,
     8,
+    0,
     0,
     0,
     &apce_validate,
@@ -4619,6 +4711,7 @@ struct query Queries2[] = {
     0,
     "name = '%s'",
     1,
+    0,
     &dpce_validate,
   },
 
@@ -4634,7 +4727,8 @@ struct query Queries2[] = {
     8,
     "pc.name LIKE '%s' ESCAPE '*' AND m.mach_id = pc.mach_id",
     1,
-    &VDwildsortf,
+    "pc.name",
+    &VDwildfixmodby,
   },
 
   {
@@ -4649,6 +4743,7 @@ struct query Queries2[] = {
     0,
     "name = '%s'",
     1,
+    0,
     &dpce_validate,
   },
 
@@ -4664,7 +4759,8 @@ struct query Queries2[] = {
     6,
     "pal.name LIKE '%s' ESCAPE '*' AND m.mach_id = pal.mach_id",
     1,
-    &VDwildsortf,
+    "pal.name",
+    &VDwildfixmodby,
   },
 
   {
@@ -4677,6 +4773,7 @@ struct query Queries2[] = {
     "INTO palladium (name, identifier, mach_id) VALUES ('%s',%s,%d)",
     apdm_fields,
     3,
+    0,
     0,
     0,
     &apdm_validate,
@@ -4694,6 +4791,7 @@ struct query Queries2[] = {
     0,
     "name = '%s'",
     1,
+    0,
     &dpdm_validate,
   },
 
@@ -4709,7 +4807,8 @@ struct query Queries2[] = {
     3,
     "name LIKE '%s' ESCAPE '*' AND type LIKE '%s' ESCAPE '*' AND trans LIKE '%s' ESCAPE '*'",
     3,
-    &VDwild3sort1,
+    "name, type, trans",
+    &VDwild3,
   },
 
   {
@@ -4723,6 +4822,7 @@ struct query Queries2[] = {
     aali_fields,
     3,
     (char *)0,
+    0,
     0,
     &aali_validate,
   },
@@ -4739,6 +4839,7 @@ struct query Queries2[] = {
     0,
     "name = '%s' AND type = '%s' AND  trans = '%s'", 
     3,
+    0,
     &dali_validate,
   },
 
@@ -4754,6 +4855,7 @@ struct query Queries2[] = {
     1,
     "name = '%s'",
     1,
+    0,
     &gval_validate,
   },
 
@@ -4768,6 +4870,7 @@ struct query Queries2[] = {
     aval_fields,
     2,
     (char *)0,
+    0,
     0,
     &aval_validate,
   },
@@ -4784,6 +4887,7 @@ struct query Queries2[] = {
     1,
     "name = '%s'",
     1,
+    0,
     &aval_validate,
   },
 
@@ -4799,6 +4903,7 @@ struct query Queries2[] = {
     0,
     "name = '%s'",
     1,
+    0,
     &aval_validate,
   },
 
@@ -4814,6 +4919,7 @@ struct query Queries2[] = {
     5,
     (char *)0,
     0,
+    "table_name",
     0,
   },
 
@@ -4828,6 +4934,7 @@ struct query Queries2[] = {
     _sdl_fields,
     1,
     (char *)0,
+    0,
     0,
     &_sdl_validate,
   },
