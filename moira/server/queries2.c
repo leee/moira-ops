@@ -1,6 +1,6 @@
 /* This file defines the query dispatch table for version 2 of the protocol
  *
- * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.9.1.2 1992-08-26 01:21:15 genoa Exp $
+ * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.9.1.3 1992-10-17 19:07:02 genoa Exp $
  *
  * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
  * For copying and distribution information, please see the file
@@ -1053,7 +1053,7 @@ static struct validate rsve_validate = {
   asin_valobj,
   1,
   NAME,
-  "services.name = uppercase('%s')",
+  "servers.name = uppercase('%s')",
   1,
   0,
   access_service,
@@ -1085,7 +1085,7 @@ static struct validate dsin_validate = {
   asin_valobj,
   1,
   NAME,
-  "services.name = uppercase('%s')",
+  "s.name = uppercase('%s')",
   1,
   0,
   0,
