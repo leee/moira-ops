@@ -1,6 +1,6 @@
 /* This file defines the query dispatch table for version 2 of the protocol
  *
- * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.28.2.4 1997-10-03 17:31:22 danw Exp $
+ * $Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/server/queries2.c,v 2.28.2.5 1997-10-03 18:07:16 danw Exp $
  *
  * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
  * For copying and distribution information, please see the file
@@ -9,9 +9,6 @@
 
 #include <mit-copyright.h>
 #include "mr_server.h"
-#undef ACE_TYPE
-#undef ACE_NAME
-#undef NAME
 #include "query.h"
 #include "mr_et.h"
 
@@ -103,64 +100,12 @@ int _sdl_followup();
 
 
 
-/* String compression
- * These are commonly used strings in the table, defined here so that
- * they can be shared.
- */
-
-static char ACE_NAME[] = "ace_name";
-static char ACE_TYPE[] = "ace_type";
-static char ADDRESS[] = "address";
-static char ALIAS[] = "alias";
-static char CLASS[] = "class";
-static char CLU_ID[] = "clu_id";
-static char CLUSTER[] = "clusters";
-static char COMMENTS[] = "comments";
-static char DESC[] = "description";
-static char DEVICE[] = "device";
-static char DIR[] = "dir";
-static char FILESYS[] = "filesys";
-static char FILSYS_ID[] = "filsys_id";
-static char FIRST[] = "first";
-static char HOSTACCESS[] = "hostaccess";
-static char LABEL[] = "label";
-static char LAST[] = "last";
-static char LIST[] = "list";
-static char LIST_ID[] = "list_id";
-static char LOCATION[] = "location";
-static char LOGIN[] = "login";
-static char MACH_ID[] = "mach_id";
-static char MACHINE[] = "machine";
-static char MIDDLE[] = "middle";
-static char MIT_ID[] = "clearid";
-static char MOD1[] = "modtime";
-static char MOD2[] = "modby";
-static char MOD3[] = "modwith";
-static char NAME[] = "name";
-static char PRINTCAP[] = "printcap";
-static char QUOTA[] = "quota";
-static char QUOTA_TYPE[] = "quota_type";
-static char SECURE[] = "secure";
-static char SERVICE[] = "service";
-static char SERVERS[] = "servers";
-static char SHELL[] = "shell";
-static char SIGNATURE[] = "signature";
-static char SNET_ID[] = "snet_id";
-static char SUBNET[] = "subnet";
-static char STATUS[] = "status";
-static char TYPE[] = "type";
-static char USERS[] = "users";
-static char USERS_ID[] = "users_id";
-static char UID[] = "unix_uid";
-static char ZEPH[] = "zephyr";
-static char ZEPH_ID[] = "xmt_id";
-
 /* Table Names */
 char *table_name[] = {
-  "none", USERS, "krbmap", MACHINE, "hostalias", SUBNET, CLUSTER,
-  "mcmap", "svc", LIST, "imembers", SERVERS, "serverhosts", FILESYS,
-  "fsgroup", "nfsphys", "quota", ZEPH, HOSTACCESS, "strings", "services",
-  PRINTCAP, "palladium", "capacls", "alias", "numvalues", "tblstats",
+  "none", "users", "krbmap", "machine", "hostalias", "subnet", "cluster",
+  "mcmap", "svc", "list", "imembers", "servers", "serverhosts", "filesys",
+  "fsgroup", "nfsphys", "quota", "zephyr", "hostaccess", "strings", "services",
+  "printcap", "palladium", "capacls", "alias", "numvalues", "tblstats",
   "incremental"};
 int num_tables = 27;
 
@@ -171,27 +116,27 @@ int num_tables = 27;
  */
 
 static struct valobj VOuser0[] = {
-  {V_ID, 0, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
+  {V_ID, 0, USERS_TABLE, "login", "users_id", MR_USER},
 };
 
 static struct valobj VOmach0[] = {
-  {V_ID, 0, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_ID, 0, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
 };
 
 static struct valobj VOclu0[] = {
-  {V_ID, 0, CLUSTER_TABLE, NAME, CLU_ID, MR_CLUSTER},
+  {V_ID, 0, CLUSTER_TABLE, "name", "clu_id", MR_CLUSTER},
 };
 
 static struct valobj VOsnet0[] = {
-  {V_ID, 0, SUBNET_TABLE, NAME, SNET_ID, MR_CLUSTER},
+  {V_ID, 0, SUBNET_TABLE, "name", "snet_id", MR_CLUSTER},
 };
 
 static struct valobj VOlist0[] = {
-  {V_ID, 0, LIST_TABLE, NAME, LIST_ID, MR_LIST},
+  {V_ID, 0, LIST_TABLE, "name", "list_id", MR_LIST},
 };
 
 static struct valobj VOfilsys0[] = {
-  {V_ID, 0, FILESYS_TABLE, LABEL, FILSYS_ID, MR_FILESYS},
+  {V_ID, 0, FILESYS_TABLE, "label", "filsys_id", MR_FILESYS},
 };
 
 static struct valobj VOchar0[] = {
@@ -221,19 +166,19 @@ static struct validate VDfixmodby = {
 /* Query data */
 
 static char *galo_fields[] = {
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE,
+  "login", "uid", "shell", "last", "first", "middle",
 };
 
 static char *gual_fields[] = {
-  LOGIN,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS,
-  MIT_ID, CLASS, COMMENTS, SIGNATURE, SECURE, MOD1, MOD2, MOD3,
+  "login",
+  "login", "uid", "shell", "last", "first", "middle", "status",
+  "clearid", "class", "comments", "signature", "secure", "modtime", "modby", "modwith",
 };
 
 static char *gubl_fields[] = {
-  LOGIN,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS, 
-  MIT_ID, CLASS, MOD1, MOD2, MOD3,
+  "login",
+  "login", "uid", "shell", "last", "first", "middle", "status", 
+  "clearid", "class", "modtime", "modby", "modwith",
 };
 
 static struct validate gubl_validate =	
@@ -250,15 +195,15 @@ static struct validate gubl_validate =
 };
 
 static char *guau_fields[] = {
-  UID,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS,
-  MIT_ID, CLASS, COMMENTS, SIGNATURE, SECURE, MOD1, MOD2, MOD3,
+  "uid",
+  "login", "uid", "shell", "last", "first", "middle", "status",
+  "clearid", "class", "comments", "signature", "secure", "modtime", "modby", "modwith",
 };
 
 static char *guan_fields[] = {
-  FIRST, LAST,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS,
-  MIT_ID, CLASS, COMMENTS, SIGNATURE, SECURE, MOD1, MOD2, MOD3,
+  "first", "last",
+  "login", "uid", "shell", "last", "first", "middle", "status",
+  "clearid", "class", "comments", "signature", "secure", "modtime", "modby", "modwith",
 };
 
 static struct validate guan_validate =	
@@ -275,21 +220,21 @@ static struct validate guan_validate =
 };
 
 static char *guac_fields[] = {
-  CLASS,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS,
-  MIT_ID, CLASS, COMMENTS, SIGNATURE, SECURE, MOD1, MOD2, MOD3,
+  "class",
+  "login", "uid", "shell", "last", "first", "middle", "status",
+  "clearid", "class", "comments", "signature", "secure", "modtime", "modby", "modwith",
 };
 
 static char *guam_fields[] = {
-  MIT_ID,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS,
-  MIT_ID, CLASS, COMMENTS, SIGNATURE, SECURE, MOD1, MOD2, MOD3,
+  "clearid",
+  "login", "uid", "shell", "last", "first", "middle", "status",
+  "clearid", "class", "comments", "signature", "secure", "modtime", "modby", "modwith",
 };
 
 static char *gubu_fields[] = {
-  UID,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS, 
-  MIT_ID, CLASS, MOD1, MOD2, MOD3,
+  "uid",
+  "login", "uid", "shell", "last", "first", "middle", "status", 
+  "clearid", "class", "modtime", "modby", "modwith",
 };
 
 static struct valobj gubu_valobj[] = {
@@ -310,9 +255,9 @@ static struct validate gubu_validate =
 };
 
 static char *gubn_fields[] = {
-  FIRST, LAST,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS, 
-  MIT_ID, CLASS, MOD1, MOD2, MOD3,
+  "first", "last",
+  "login", "uid", "shell", "last", "first", "middle", "status", 
+  "clearid", "class", "modtime", "modby", "modwith",
 };
 
 static struct validate gubn_validate =
@@ -329,19 +274,19 @@ static struct validate gubn_validate =
 };
 
 static char *gubc_fields[] = {
-  CLASS,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS, 
-  MIT_ID, CLASS, MOD1, MOD2, MOD3,
+  "class",
+  "login", "uid", "shell", "last", "first", "middle", "status", 
+  "clearid", "class", "modtime", "modby", "modwith",
 };
 
 static char *gubm_fields[] = {
-  MIT_ID,
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS, 
-  MIT_ID, CLASS, MOD1, MOD2, MOD3,
+  "clearid",
+  "login", "uid", "shell", "last", "first", "middle", "status", 
+  "clearid", "class", "modtime", "modby", "modwith",
 };
 
 static char *gudf_fields[] = {
-  LOGIN,
+  "login",
   "dirsuppress", "dirremote"
 };
 
@@ -359,20 +304,20 @@ static struct validate gudf_validate =
 };
 
 static char *auac_fields[] = {
-  LOGIN, UID, SHELL, LAST, FIRST, MIDDLE, STATUS, 
-  MIT_ID, CLASS, COMMENTS, SIGNATURE, SECURE,
+  "login", "uid", "shell", "last", "first", "middle", "status", 
+  "clearid", "class", "comments", "signature", "secure",
 };
 
 static struct valobj auac_valobj[] = {
-  {V_CHAR, 0, USERS_TABLE, LOGIN},
+  {V_CHAR, 0, USERS_TABLE, "login"},
   {V_NUM, 1},
-  {V_CHAR, 2, USERS_TABLE, SHELL},
-  {V_CHAR, 3, USERS_TABLE, LAST},
-  {V_CHAR, 4, USERS_TABLE, FIRST},
-  {V_CHAR, 5, USERS_TABLE, MIDDLE},
+  {V_CHAR, 2, USERS_TABLE, "shell"},
+  {V_CHAR, 3, USERS_TABLE, "last"},
+  {V_CHAR, 4, USERS_TABLE, "first"},
+  {V_CHAR, 5, USERS_TABLE, "middle"},
   {V_NUM, 6},
-  {V_CHAR, 7, USERS_TABLE, MIT_ID},
-  {V_TYPE, 8, 0, CLASS, 0, MR_BAD_CLASS},
+  {V_CHAR, 7, USERS_TABLE, "clearid"},
+  {V_TYPE, 8, 0, "class", 0, MR_BAD_CLASS},
   {V_ID, 9, STRINGS_TABLE, "string", "string_id", MR_NO_MATCH},
   {V_NUM, 10}
 };
@@ -380,10 +325,10 @@ static struct valobj auac_valobj[] = {
 static struct validate auac_validate = {
   auac_valobj,
   11,
-  LOGIN,
+  "login",
   "login = '%s'",
   1,
-  USERS_ID,
+  "users_id",
   0,
   setup_ausr,
   followup_ausr,
@@ -392,17 +337,17 @@ static struct validate auac_validate = {
 static struct validate ausr_validate = {
   auac_valobj,
   9,
-  LOGIN,
+  "login",
   "login = '%s'",
   1,
-  USERS_ID,
+  "users_id",
   0,
   setup_ausr,
   followup_ausr,
 };
 
 static char *rusr_fields[] = {
-  UID, LOGIN, "fs_type"
+  "uid", "login", "fs_type"
 };
 
 static struct valobj rusr_valobj[] = {
@@ -424,22 +369,22 @@ static struct validate rusr_validate = {
 };
 
 static char *uuac_fields[] = {
-  LOGIN,
-  "newlogin", UID, SHELL, LAST, FIRST, MIDDLE, STATUS, 
-  MIT_ID, CLASS, COMMENTS, SIGNATURE, SECURE,
+  "login",
+  "newlogin", "uid", "shell", "last", "first", "middle", "status", 
+  "clearid", "class", "comments", "signature", "secure",
 };
 
 static struct valobj uuac_valobj[] = {
-  {V_ID, 0, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
-  {V_RENAME, 1, USERS_TABLE, LOGIN, USERS_ID, MR_NOT_UNIQUE},
+  {V_ID, 0, USERS_TABLE, "login", "users_id", MR_USER},
+  {V_RENAME, 1, USERS_TABLE, "login", "users_id", MR_NOT_UNIQUE},
   {V_NUM, 2},
-  {V_CHAR, 3, USERS_TABLE, SHELL},
-  {V_CHAR, 4, USERS_TABLE, FIRST},
-  {V_CHAR, 5, USERS_TABLE, LAST},
-  {V_CHAR, 6, USERS_TABLE, MIDDLE},
+  {V_CHAR, 3, USERS_TABLE, "shell"},
+  {V_CHAR, 4, USERS_TABLE, "first"},
+  {V_CHAR, 5, USERS_TABLE, "last"},
+  {V_CHAR, 6, USERS_TABLE, "middle"},
   {V_NUM, 7},
-  {V_CHAR, 8, USERS_TABLE, MIT_ID},
-  {V_TYPE, 9, 0, CLASS, 0, MR_BAD_CLASS},
+  {V_CHAR, 8, USERS_TABLE, "clearid"},
+  {V_TYPE, 9, 0, "class", 0, MR_BAD_CLASS},
   {V_ID, 10, STRINGS_TABLE, "string", "string_id", MR_NO_MATCH},
   {V_NUM, 12},
 };
@@ -450,7 +395,7 @@ static struct validate uuac_validate = {
   0,
   0,
   0,
-  USERS_ID,
+  "users_id",
   0,
   setup_ausr,
   followup_uuac,
@@ -462,20 +407,20 @@ static struct validate uusr_validate = {
   0,
   0,
   0,
-  USERS_ID,
+  "users_id",
   0,
   setup_ausr,
   set_modtime_by_id,
 };
 
 static char *uush_fields[] = {
-  LOGIN,
-  SHELL,
+  "login",
+  "shell",
 };
 
 static struct valobj uush_valobj[] = {
-  {V_ID, 0, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
-  {V_CHAR, 1, USERS_TABLE, SHELL},
+  {V_ID, 0, USERS_TABLE, "login", "users_id", MR_USER},
+  {V_CHAR, 1, USERS_TABLE, "shell"},
 };
 
 static struct validate uush_validate = {
@@ -484,24 +429,24 @@ static struct validate uush_validate = {
   0,
   0,
   0,
-  USERS_ID,
+  "users_id",
   access_user,
   0,
   set_modtime_by_id,
 };
 
 static char *uust_fields[] = {
-  LOGIN,
-  STATUS,
+  "login",
+  "status",
 };
 
 static char *uuss_fields[] = {
-  LOGIN,
-  SECURE,
+  "login",
+  "secure",
 };
 
 static struct valobj uust_valobj[] = {
-  {V_ID, 0, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
+  {V_ID, 0, USERS_TABLE, "login", "users_id", MR_USER},
   {V_NUM, 1},
   {V_NUM, 2},
 };
@@ -512,14 +457,14 @@ static struct validate uust_validate = {
   0,
   0,
   0,
-  USERS_ID,
+  "users_id",
   0,
   0,
   set_modtime_by_id,
 };
 
 static char *uudf_fields[] = {
-  LOGIN,
+  "login",
   "dirsuppress", "dirremote"
 };
 
@@ -529,14 +474,14 @@ static struct validate uudf_validate = {
   0,
   0,
   0,
-  USERS_ID,
+  "users_id",
   access_user,
   0,
   set_modtime_by_id,
 };
 
 static char *dusr_fields[] = {
-  LOGIN,
+  "login",
 };
 
 static struct validate dusr_validate = {
@@ -552,11 +497,11 @@ static struct validate dusr_validate = {
 };
 
 static char *dubu_fields[] = {
-  UID,
+  "uid",
 };
 
 static struct valobj dubu_valobj[] = {
-  {V_ID, 0, USERS_TABLE, UID, USERS_ID, MR_USER}
+  {V_ID, 0, USERS_TABLE, "uid", "users_id", MR_USER}
 };
 
 static struct validate dubu_validate = {
@@ -571,14 +516,14 @@ static struct validate dubu_validate = {
   0,
 };
 
-static char *gkum_fields[] = { LOGIN, "kerberos",
-				   LOGIN, "kerberos" };
+static char *gkum_fields[] = { "login", "kerberos",
+				   "login", "kerberos" };
 
-static char *akum_fields[] = { LOGIN, "kerberos" };
+static char *akum_fields[] = { "login", "kerberos" };
 
 static struct valobj akum_valobj[] =
 {
-  {V_ID, 0, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
+  {V_ID, 0, USERS_TABLE, "login", "users_id", MR_USER},
   {V_ID, 1, STRINGS_TABLE, "string", "string_id", MR_NO_MATCH},
 };
 
@@ -586,10 +531,10 @@ static struct validate akum_validate =
 {
   akum_valobj,
   2,
-  USERS_ID,
+  "users_id",
   "users_id = %d or string_id = %d",
   2,
-  USERS_ID,
+  "users_id",
   access_user,
   setup_akum,
   0,
@@ -599,20 +544,20 @@ static struct validate dkum_validate =
 {
   akum_valobj,
   2,
-  USERS_ID,
+  "users_id",
   "users_id = %d and string_id = %d",
   2,
-  USERS_ID,
+  "users_id",
   access_user,
   0,
   0,
 };
 
 static char *gfbl_fields[] = {
-  LOGIN,
-  LOGIN, "fullname", "nickname", "home_addr",
+  "login",
+  "login", "fullname", "nickname", "home_addr",
   "home_phone", "office_addr", "office_phone", "department", 
-  "affiliation", MOD1, MOD2, MOD3,
+  "affiliation", "modtime", "modby", "modwith",
 };
 
 static struct validate gfbl_validate = {
@@ -628,14 +573,14 @@ static struct validate gfbl_validate = {
 };
 
 static char *ufbl_fields[] = {
-  LOGIN,
+  "login",
   "fullname", "nickname", "home_addr",
   "home_phone", "office_addr", "office_phone", "department", 
   "affiliation",
 };
 
 static struct valobj ufbl_valobj[] = {
-  {V_ID, 0, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
+  {V_ID, 0, USERS_TABLE, "login", "users_id", MR_USER},
   {V_LEN, 1, USERS_TABLE, "fullname"},
   {V_LEN, 2, USERS_TABLE, "nickname"},
   {V_LEN, 3, USERS_TABLE, "home_addr"},
@@ -659,8 +604,8 @@ static struct validate ufbl_validate = {
 };
 
 static char *gpob_fields[] = {
-  LOGIN,
-  LOGIN, TYPE, "box", MOD1, MOD2, MOD3,
+  "login",
+  "login", "type", "box", "modtime", "modby", "modwith",
 };
 
 static struct validate gpob_validate = {
@@ -676,7 +621,7 @@ static struct validate gpob_validate = {
 };
 
 static char *gpox_fields[] = {
-  LOGIN, TYPE, "box",
+  "login", "type", "box",
 };
 
 static struct validate gpox_validate = {
@@ -692,11 +637,11 @@ static struct validate gpox_validate = {
 };
 
 static char *spob_fields[] = {
-  LOGIN, TYPE, "box",
+  "login", "type", "box",
 };
 
 static struct valobj spob_valobj[] = {
-  {V_ID, 0, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
+  {V_ID, 0, USERS_TABLE, "login", "users_id", MR_USER},
   {V_TYPE, 1, 0, "pobox", 0, MR_TYPE},
 };
 
@@ -740,13 +685,13 @@ static struct validate dpob_validate =	/* DELETE_POBOX */
 };
 
 static char *gmac_fields[] = {
-  NAME,
-  NAME, TYPE, MOD1, MOD2, MOD3,
+  "name",
+  "name", "type", "modtime", "modby", "modwith",
 };
 
 static char *ghst_fields[] = {
-  NAME, ADDRESS, "location", "network",
-  NAME, "vendor", "model", "os", "location", "contact", "use", "status", "status_change", "network", ADDRESS, ACE_TYPE, ACE_NAME, "admin_comment", "ops_comment", "created", "creator", "inuse", MOD1, MOD2, MOD3,
+  "name", "address", "location", "network",
+  "name", "vendor", "model", "os", "location", "contact", "use", "status", "status_change", "network", "address", "ace_type", "ace_name", "admin_comment", "ops_comment", "created", "creator", "inuse", "modtime", "modby", "modwith",
 };
 
 static struct validate ghst_validate = { 
@@ -762,11 +707,11 @@ static struct validate ghst_validate = {
 };
 
 static char *ahst_fields[] = {
-  NAME, "vendor", "model", "os", "location", "contact", "use", "status", SUBNET, ADDRESS, ACE_TYPE, ACE_NAME, "admin_comment", "ops_comment",
+  "name", "vendor", "model", "os", "location", "contact", "use", "status", "subnet", "address", "ace_type", "ace_name", "admin_comment", "ops_comment",
 };
 
 static struct valobj ahst_valobj[] = {
-  {V_CHAR, 0, MACHINE_TABLE, NAME},
+  {V_CHAR, 0, MACHINE_TABLE, "name"},
   {V_CHAR, 1, MACHINE_TABLE, "vendor"},
   {V_CHAR, 2, MACHINE_TABLE, "model"},
   {V_CHAR, 3, MACHINE_TABLE, "os"},
@@ -774,8 +719,8 @@ static struct valobj ahst_valobj[] = {
   {V_CHAR, 5, MACHINE_TABLE, "contact"},
   {V_NUM, 6},
   {V_NUM, 7},
-  {V_ID, 8, SUBNET_TABLE, NAME, SNET_ID, MR_SUBNET},
-  {V_TYPE, 10, 0, ACE_TYPE, 0, MR_ACE},
+  {V_ID, 8, SUBNET_TABLE, "name", "snet_id", MR_SUBNET},
+  {V_TYPE, 10, 0, "ace_type", 0, MR_ACE},
   {V_TYPEDATA, 11, 0, 0, 0, MR_ACE},
   {V_ID, 12, STRINGS_TABLE, "string", "string_id", MR_NO_MATCH},
   {V_ID, 13, STRINGS_TABLE, "string", "string_id", MR_NO_MATCH},
@@ -784,24 +729,24 @@ static struct valobj ahst_valobj[] = {
 static struct validate ahst_validate = {
   ahst_valobj,
   13,
-  NAME,
+  "name",
   "name = UPPER('%s')",
   1,
-  MACH_ID,
+  "mach_id",
   access_host,
   setup_ahst,
   set_uppercase_modtime,
 };
 
 static char *uhst_fields[] = {
-  NAME,
-  "newname", "vendor", "model", "os", "location", "contact", "use", "status", SUBNET, ADDRESS, ACE_TYPE, ACE_NAME, "admin_comment", "ops_comment",
+  "name",
+  "newname", "vendor", "model", "os", "location", "contact", "use", "status", "subnet", "address", "ace_type", "ace_name", "admin_comment", "ops_comment",
 };
 
 static struct valobj uhst_valobj[] = {
   {V_CHAR, 0, MACHINE_TABLE, "name"},
-  {V_ID, 0, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
-  {V_RENAME, 1, MACHINE_TABLE, NAME, MACH_ID, MR_NOT_UNIQUE},
+  {V_ID, 0, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
+  {V_RENAME, 1, MACHINE_TABLE, "name", "mach_id", MR_NOT_UNIQUE},
   {V_CHAR, 2, MACHINE_TABLE, "vendor"},
   {V_CHAR, 3, MACHINE_TABLE, "model"},
   {V_CHAR, 4, MACHINE_TABLE, "os"},
@@ -809,8 +754,8 @@ static struct valobj uhst_valobj[] = {
   {V_CHAR, 6, MACHINE_TABLE, "contact"},
   {V_NUM, 7},
   {V_NUM, 8},
-  {V_ID, 9, SUBNET_TABLE, NAME, SNET_ID, MR_SUBNET},
-  {V_TYPE, 11, 0, ACE_TYPE, 0, MR_ACE},
+  {V_ID, 9, SUBNET_TABLE, "name", "snet_id", MR_SUBNET},
+  {V_TYPE, 11, 0, "ace_type", 0, MR_ACE},
   {V_TYPEDATA, 12, 0, 0, 0, MR_ACE},
   {V_ID, 13, STRINGS_TABLE, "string", "string_id", MR_NO_MATCH},
   {V_ID, 14, STRINGS_TABLE, "string", "string_id", MR_NO_MATCH},
@@ -822,14 +767,14 @@ static struct validate uhst_validate = {
   0,
   0,
   0,
-  MACH_ID,
+  "mach_id",
   access_host,
   setup_ahst,
   set_modtime_by_id,
 };
 
 static char *dhst_fields[] = {
-  NAME,
+  "name",
 };
 
 static struct validate dhst_validate = {
@@ -845,8 +790,8 @@ static struct validate dhst_validate = {
 };
 
 static char *ghal_fields[] = {
-    ALIAS, "canonical_hostname",
-    ALIAS, "canonical_hostname"
+    "alias", "canonical_hostname",
+    "alias", "canonical_hostname"
 };
 
 static struct validate ghal_validate = {
@@ -862,42 +807,42 @@ static struct validate ghal_validate = {
 };
 
 static struct valobj ahal_valobj[] = {
-  {V_CHAR, 0, HOSTALIAS_TABLE, NAME},
-  {V_ID, 1, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_CHAR, 0, HOSTALIAS_TABLE, "name"},
+  {V_ID, 1, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
 };
 
 static struct validate ahal_validate = {
   ahal_valobj,
   2,
-  NAME,
+  "name",
   "name = '%s'",
   1,
-  MACH_ID,
+  "mach_id",
   access_ahal,
   setup_ahal,
   0,
 };
 
 static struct valobj dhal_valobj[] = {
-  {V_ID, 1, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_ID, 1, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
 };
 
 static struct validate dhal_validate = {
   dhal_valobj,
   1,
-  NAME,
+  "name",
   "name = '%s' AND mach_id = %d",
   2,
-  MACH_ID,
+  "mach_id",
   access_ahal,
   0,
   0,
 };
 
 static char *gsnt_fields[] = {
-    NAME,
-    NAME, DESC, ADDRESS, "mask", "low", "high", "prefix", ACE_TYPE, ACE_NAME,
-    MOD1, MOD2, MOD3
+    "name",
+    "name", "description", "address", "mask", "low", "high", "prefix", "ace_type", "ace_name",
+    "modtime", "modby", "modwith"
 };
 
 static struct validate gsnt_validate = {
@@ -913,18 +858,18 @@ static struct validate gsnt_validate = {
 };
 
 static char *asnt_fields[] = {
-    NAME, DESC, ADDRESS, "mask", "low", "high", "prefix", ACE_TYPE, ACE_NAME,
+    "name", "description", "address", "mask", "low", "high", "prefix", "ace_type", "ace_name",
 };
 
 static struct valobj asnt_valobj[] = {
-  {V_CHAR, 0, SUBNET_TABLE, NAME},
-  {V_LEN, 1, SUBNET_TABLE, DESC},
+  {V_CHAR, 0, SUBNET_TABLE, "name"},
+  {V_LEN, 1, SUBNET_TABLE, "description"},
   {V_NUM, 2},
   {V_NUM, 3},
   {V_NUM, 4},
   {V_NUM, 5},
   {V_LEN, 6, SUBNET_TABLE, "prefix"},
-  {V_TYPE, 7, 0, ACE_TYPE, 0, MR_ACE},
+  {V_TYPE, 7, 0, "ace_type", 0, MR_ACE},
   {V_TYPEDATA, 8, 0, 0, 0, MR_ACE},
 };
 
@@ -932,30 +877,30 @@ static struct validate asnt_validate =
 {
     asnt_valobj,
     9,
-    NAME,
+    "name",
     "name = UPPER('%s')",
     1,
-    SNET_ID,
+    "snet_id",
     0,
     prefetch_value,
     set_uppercase_modtime,
 };
 
 static char *usnt_fields[] = {
-    NAME,
-    "newname", DESC, ADDRESS, "mask", "low", "high", "prefix", ACE_TYPE, ACE_NAME,
+    "name",
+    "newname", "description", "address", "mask", "low", "high", "prefix", "ace_type", "ace_name",
 };
 
 static struct valobj usnt_valobj[] = {
-  {V_ID, 0, SUBNET_TABLE, NAME, SNET_ID, MR_NO_MATCH},
-  {V_RENAME, 1, SUBNET_TABLE, NAME, SNET_ID, MR_NOT_UNIQUE},
-  {V_LEN, 2, SUBNET_TABLE, DESC},
+  {V_ID, 0, SUBNET_TABLE, "name", "snet_id", MR_NO_MATCH},
+  {V_RENAME, 1, SUBNET_TABLE, "name", "snet_id", MR_NOT_UNIQUE},
+  {V_LEN, 2, SUBNET_TABLE, "description"},
   {V_NUM, 3},
   {V_NUM, 4},
   {V_NUM, 5},
   {V_NUM, 6},
   {V_LEN, 7, SUBNET_TABLE, "prefix"},
-  {V_TYPE, 8, 0, ACE_TYPE, 0, MR_ACE},
+  {V_TYPE, 8, 0, "ace_type", 0, MR_ACE},
   {V_TYPEDATA, 9, 0, 0, 0, MR_ACE},
 };
 
@@ -963,17 +908,17 @@ static struct validate usnt_validate =
 {
     usnt_valobj,
     10,
-    NAME,
+    "name",
     "snet_id = %d",
     1,
-    SNET_ID,
+    "snet_id",
     0,
     0,
     set_modtime_by_id,
 };
 
 static char *dsnt_fields[] = {
-  NAME,
+  "name",
 };
 
 static struct validate dsnt_validate = {
@@ -989,43 +934,43 @@ static struct validate dsnt_validate = {
 };
 
 static char *gclu_fields[] = {
-  NAME,
-  NAME, DESC, LOCATION, MOD1, MOD2, MOD3, 
+  "name",
+  "name", "description", "location", "modtime", "modby", "modwith", 
 };
 
 static char *aclu_fields[] = {
-  NAME, DESC, LOCATION,
+  "name", "description", "location",
 };
 
 static struct valobj aclu_valobj[] = {
-  {V_CHAR, 0, CLUSTER_TABLE, NAME},
-  {V_LEN, 1, CLUSTER_TABLE, DESC},
-  {V_LEN, 2, CLUSTER_TABLE, LOCATION},
+  {V_CHAR, 0, CLUSTER_TABLE, "name"},
+  {V_LEN, 1, CLUSTER_TABLE, "description"},
+  {V_LEN, 2, CLUSTER_TABLE, "location"},
 };
 
 static struct validate aclu_validate =	
 {
   aclu_valobj,
   3,
-  NAME,
+  "name",
   "name = '%s'",
   1,
-  CLU_ID,
+  "clu_id",
   0,
   prefetch_value,
   set_modtime,
 };
 
 static char *uclu_fields[] = {
-  NAME,
-  "newname", DESC, LOCATION,
+  "name",
+  "newname", "description", "location",
 };
 
 static struct valobj uclu_valobj[] = {
-  {V_ID, 0, CLUSTER_TABLE, NAME, CLU_ID, MR_CLUSTER},
-  {V_RENAME, 1, CLUSTER_TABLE, NAME, CLU_ID, MR_NOT_UNIQUE},
-  {V_LEN, 2, CLUSTER_TABLE, DESC},
-  {V_LEN, 3, CLUSTER_TABLE, LOCATION},
+  {V_ID, 0, CLUSTER_TABLE, "name", "clu_id", MR_CLUSTER},
+  {V_RENAME, 1, CLUSTER_TABLE, "name", "clu_id", MR_NOT_UNIQUE},
+  {V_LEN, 2, CLUSTER_TABLE, "description"},
+  {V_LEN, 3, CLUSTER_TABLE, "location"},
 };
 
 static struct validate uclu_validate = {
@@ -1034,14 +979,14 @@ static struct validate uclu_validate = {
   0,
   0,
   0,
-  CLU_ID,
+  "clu_id",
   0,
   0,
   set_modtime_by_id,
 };
 
 static char *dclu_fields[] = {
-  NAME,
+  "name",
 };
 
 static struct validate dclu_validate = {
@@ -1057,21 +1002,21 @@ static struct validate dclu_validate = {
 };
 
 static char *gmcm_fields[] = {
-  MACHINE, CLUSTER,
-  MACHINE, CLUSTER,
+  "machine", "cluster",
+  "machine", "cluster",
 };
 
 static struct valobj amtc_valobj[] =	/* ADD_MACHINE_TO_CLUSTER */
 {					/* DELETE_MACHINE_FROM_CLUSTER */
-  {V_ID, 0, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
-  {V_ID, 1, CLUSTER_TABLE, NAME, CLU_ID, MR_CLUSTER},
+  {V_ID, 0, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
+  {V_ID, 1, CLUSTER_TABLE, "name", "clu_id", MR_CLUSTER},
 };
 
 static struct validate amtc_validate = /* for amtc and dmfc */
 {
   amtc_valobj,
   2,
-  MACH_ID,
+  "mach_id",
   "mach_id = %d and clu_id = %d",
   2,
   0,
@@ -1081,17 +1026,17 @@ static struct validate amtc_validate = /* for amtc and dmfc */
 };
 
 static char *gcld_fields[] = {
-  CLUSTER, "serv_label",
-  CLUSTER, "serv_label", "serv_cluster",
+  "cluster", "serv_label",
+  "cluster", "serv_label", "serv_cluster",
 };
 
 static char *acld_fields[] = {
-  CLUSTER, "serv_label", "serv_cluster",
+  "cluster", "serv_label", "serv_cluster",
 };
 
 static struct valobj acld_valobj[] =
 {
-  {V_ID, 0, CLUSTER_TABLE, NAME, CLU_ID, MR_CLUSTER},
+  {V_ID, 0, CLUSTER_TABLE, "name", "clu_id", MR_CLUSTER},
   {V_CHAR, 1, SVC_TABLE, "serv_label"},
   {V_CHAR, 2, SVC_TABLE, "serv_cluster"}
 };
@@ -1100,7 +1045,7 @@ static struct validate acld_validate =
 {					
   acld_valobj,
   3,
-  CLU_ID,
+  "clu_id",
   "clu_id = %d AND serv_label = '%s' AND serv_cluster = '%s'",
   3,
   0,
@@ -1111,14 +1056,14 @@ static struct validate acld_validate =
 
 static struct valobj dcld_valobj[] =
 {
-  {V_ID, 0, CLUSTER_TABLE, NAME, CLU_ID, MR_CLUSTER},
+  {V_ID, 0, CLUSTER_TABLE, "name", "clu_id", MR_CLUSTER},
 };
 
 static struct validate dcld_validate =	
 {					
   dcld_valobj,
   1,
-  CLU_ID,
+  "clu_id",
   "clu_id = %d AND serv_label = '%s' AND serv_cluster = '%s'",
   3,
   0,
@@ -1128,9 +1073,9 @@ static struct validate dcld_validate =
 };
 
 static char *glin_fields[] = {
-  NAME,
-  NAME, "active", "publicflg", "hidden", "maillist", "grouplist", "gid",
-  ACE_TYPE, ACE_NAME, DESC, MOD1, MOD2, MOD3,
+  "name",
+  "name", "active", "publicflg", "hidden", "maillist", "grouplist", "gid",
+  "ace_type", "ace_name", "description", "modtime", "modby", "modwith",
 };
 
 static struct validate glin_validate = {
@@ -1146,75 +1091,75 @@ static struct validate glin_validate = {
 };
 
 static char *alis_fields[] = {
-  NAME, "active", "publicflg", "hidden", "maillist", "grouplist", "gid",
-  ACE_TYPE, ACE_NAME, DESC,
+  "name", "active", "publicflg", "hidden", "maillist", "grouplist", "gid",
+  "ace_type", "ace_name", "description",
 };
 
 static struct valobj alis_valobj[] = {
-  {V_CHAR, 0, LIST_TABLE, NAME},
+  {V_CHAR, 0, LIST_TABLE, "name"},
   {V_NUM, 1},
   {V_NUM, 2},
   {V_NUM, 3},
   {V_NUM, 4},
   {V_NUM, 5},
   {V_NUM, 6},
-  {V_TYPE, 7, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 8, 0, 0, LIST_ID, MR_ACE},
-  {V_LEN, 9, LIST_TABLE, DESC},
+  {V_TYPE, 7, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 8, 0, 0, "list_id", MR_ACE},
+  {V_LEN, 9, LIST_TABLE, "description"},
 };
 
 static struct validate alis_validate = {
   alis_valobj,
   10,
-  NAME,
+  "name",
   "name = '%s'",
   1,
-  LIST_ID,
+  "list_id",
   0,
   setup_alis,
   set_modtime,
 };
 
 static char *ulis_fields[] = {
-  NAME,
+  "name",
   "newname", "active", "publicflg", "hidden", "maillist", "grouplist", "gid",
-  ACE_TYPE, ACE_NAME, DESC,
+  "ace_type", "ace_name", "description",
 };
 
 static struct valobj ulis_valobj[] = {
-  {V_ID, 0, LIST_TABLE, NAME, LIST_ID, MR_LIST},
-  {V_RENAME, 1, LIST_TABLE, NAME, LIST_ID, MR_NOT_UNIQUE},
+  {V_ID, 0, LIST_TABLE, "name", "list_id", MR_LIST},
+  {V_RENAME, 1, LIST_TABLE, "name", "list_id", MR_NOT_UNIQUE},
   {V_NUM, 2},
   {V_NUM, 3},
   {V_NUM, 4},
   {V_NUM, 5},
   {V_NUM, 6},
   {V_NUM, 7},
-  {V_TYPE, 8, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 9, 0, 0, LIST_ID, MR_ACE},
-  {V_LEN, 10, LIST_TABLE, DESC},
+  {V_TYPE, 8, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 9, 0, 0, "list_id", MR_ACE},
+  {V_LEN, 10, LIST_TABLE, "description"},
 };
 
 static struct validate ulis_validate = {
   ulis_valobj,
   11,
-  NAME,
+  "name",
   "list_id = %d",
   1,
-  LIST_ID,
+  "list_id",
   access_list,
   setup_alis,
   set_modtime_by_id,
 };
 
 static char *dlis_fields[] = {
-  NAME,
+  "name",
 };
 
 static struct validate dlis_validate = {
   VOlist0,
   1,
-  NAME,
+  "name",
   "list_id = %d",
   1,
   0,
@@ -1228,7 +1173,7 @@ static char *amtl_fields[] = {
 };
 
 static struct valobj amtl_valobj[] = {
-  {V_ID, 0, LIST_TABLE, NAME, LIST_ID, MR_LIST},
+  {V_ID, 0, LIST_TABLE, "name", "list_id", MR_LIST},
   {V_TYPE, 1, 0, "member", 0, MR_TYPE},
   {V_TYPEDATA, 2, 0, 0, 0, MR_NO_MATCH},
 };
@@ -1260,7 +1205,7 @@ static struct validate dmfl_validate =
 };
 
 static char *gaus_fields[] = {
-  ACE_TYPE, ACE_NAME,
+  "ace_type", "ace_name",
   "use_type", "use_name",
 };
 
@@ -1375,10 +1320,10 @@ static struct validate cmol_validate = {
 };
 
 static char *gsin_fields[] = {
-  SERVICE,
-  SERVICE, "update_int", "target_file", "script", "dfgen", "dfcheck",
-  TYPE, "enable", "inprogress", "harderror", "errmsg",
-  ACE_TYPE, ACE_NAME, MOD1, MOD2, MOD3,
+  "service",
+  "service", "update_int", "target_file", "script", "dfgen", "dfcheck",
+  "type", "enable", "inprogress", "harderror", "errmsg",
+  "ace_type", "ace_name", "modtime", "modby", "modwith",
 };
 
 static struct validate gsin_validate = 
@@ -1418,18 +1363,18 @@ static struct validate qgsv_validate = {
 };
 
 static char *asin_fields[] = {
-  SERVICE, "update_int", "target_file", "script", TYPE, "enable",
-  ACE_TYPE, ACE_NAME,
+  "service", "update_int", "target_file", "script", "type", "enable",
+  "ace_type", "ace_name",
 };
 
 static struct valobj asin_valobj[] = {
-  {V_CHAR, 0, SERVERS_TABLE, NAME},
+  {V_CHAR, 0, SERVERS_TABLE, "name"},
   {V_NUM, 1},
   {V_LEN, 2, SERVERS_TABLE, "target_file"},
   {V_LEN, 3, SERVERS_TABLE, "script"},
   {V_TYPE, 4, 0, "service", 0, MR_TYPE},
   {V_NUM, 5},
-  {V_TYPE, 6, 0, ACE_TYPE, 0, MR_ACE},
+  {V_TYPE, 6, 0, "ace_type", 0, MR_ACE},
   {V_TYPEDATA, 7, 0, 0, 0, MR_ACE},
 };
 
@@ -1437,7 +1382,7 @@ static struct validate asin_validate =	/* for asin, usin */
 {
   asin_valobj,
   8,
-  NAME,
+  "name",
   "name = UPPER('%s')",
   1,
   0,
@@ -1449,7 +1394,7 @@ static struct validate asin_validate =	/* for asin, usin */
 static struct validate rsve_validate = {
   asin_valobj,
   1,
-  NAME,
+  "name",
   "name = UPPER('%s')",
   1,
   0,
@@ -1459,7 +1404,7 @@ static struct validate rsve_validate = {
 };
 
 static char *ssif_fields[] = {
-  SERVICE, "dfgen", "dfcheck", "inprogress", "harderror", "errmsg",
+  "service", "dfgen", "dfcheck", "inprogress", "harderror", "errmsg",
 };
 
 static struct valobj ssif_valobj[] = {
@@ -1473,7 +1418,7 @@ static struct valobj ssif_valobj[] = {
 static struct validate ssif_validate = {
   ssif_valobj,
   5,
-  NAME,
+  "name",
   "name = UPPER('%s')",
   1,
   0,
@@ -1483,13 +1428,13 @@ static struct validate ssif_validate = {
 };
 
 static char *dsin_fields[] = {
-  SERVICE,
+  "service",
 };
 
 static struct validate dsin_validate = {
   asin_valobj,
   1,
-  NAME,
+  "name",
   "name = UPPER('%s')",
   1,
   0,
@@ -1499,10 +1444,10 @@ static struct validate dsin_validate = {
 };
 
 static char *gshi_fields[] = {
-  SERVICE, MACHINE,
-  SERVICE, MACHINE, "enable", "override", "success", "inprogress",
+  "service", "machine",
+  "service", "machine", "enable", "override", "success", "inprogress",
   "hosterror", "hosterrormsg", "ltt", "lts", "value1", "value2",
-  "value3", MOD1, MOD2, MOD3, 
+  "value3", "modtime", "modby", "modwith", 
 };
 
 static struct validate gshi_validate = {
@@ -1519,7 +1464,7 @@ static struct validate gshi_validate = {
 
 static char *qgsh_fields[] = {
   "service", "enable", "override", "success", "inprogress", "hosterror",
-  "service", MACHINE,
+  "service", "machine",
 };
 
 static struct valobj qgsh_valobj[] = {
@@ -1543,12 +1488,12 @@ static struct validate qgsh_validate = {
 };
 
 static char *ashi_fields[] = {
-  SERVICE, MACHINE, "enable", "value1", "value2", "value3",
+  "service", "machine", "enable", "value1", "value2", "value3",
 };
 
 static struct valobj ashi_valobj[] = {
-  {V_NAME, 0, SERVERS_TABLE, NAME, 0, MR_SERVICE},
-  {V_ID, 1, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_NAME, 0, SERVERS_TABLE, "name", 0, MR_SERVICE},
+  {V_ID, 1, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
   {V_NUM, 2},
   {V_NUM, 3},
   {V_NUM, 4},
@@ -1559,7 +1504,7 @@ static struct validate ashi_validate = /* ashi & ushi */
 {
   ashi_valobj,
   6,
-  SERVICE,
+  "service",
   "service = UPPER('%s') AND mach_id = %d",
   2,
   0,
@@ -1572,7 +1517,7 @@ static struct validate rshe_validate =
 {
   ashi_valobj,
   2,
-  SERVICE,
+  "service",
   "service = UPPER('%s') AND mach_id = %d",
   2,
   0,
@@ -1585,7 +1530,7 @@ static struct validate ssho_validate =
 {
   ashi_valobj,
   2,
-  SERVICE,
+  "service",
   "service = UPPER('%s') AND mach_id = %d",
   2,
   0,
@@ -1595,13 +1540,13 @@ static struct validate ssho_validate =
 };
 
 static char *sshi_fields[] = {
-  "service", MACHINE, "override", "success", "inprogress",
+  "service", "machine", "override", "success", "inprogress",
   "hosterror", "errmsg", "ltt", "lts",
 };
 
 static struct valobj sshi_valobj[] = {
-  {V_NAME, 0, SERVERS_TABLE, NAME, 0, MR_SERVICE},
-  {V_ID, 1, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_NAME, 0, SERVERS_TABLE, "name", 0, MR_SERVICE},
+  {V_ID, 1, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
   {V_NUM, 2},
   {V_NUM, 3},
   {V_NUM, 4},
@@ -1625,14 +1570,14 @@ static struct validate sshi_validate =
 };
 
 static char *dshi_fields[] = {
-  SERVICE, MACHINE,
+  "service", "machine",
 };
 
 static struct validate dshi_validate =	
 {
   ashi_valobj,
   2,
-  SERVICE,
+  "service",
   "service = UPPER('%s') AND mach_id = %d",
   2,
   0,
@@ -1643,19 +1588,19 @@ static struct validate dshi_validate =
 
 static char *gslo_fields[] = {
   "server",
-  "server", MACHINE,
+  "server", "machine",
 };
 
 static char *gfsl_fields[] = {
-  LABEL,
-  LABEL, TYPE, MACHINE, NAME, "mount", "access", COMMENTS, "owner", "owners",
-  "create", "lockertype", MOD1, MOD2, MOD3,
+  "label",
+  "label", "type", "machine", "name", "mount", "access", "comments", "owner", "owners",
+  "create", "lockertype", "modtime", "modby", "modwith",
 };
 
 static char *gfsm_fields[] = {
-  MACHINE,
-  LABEL, TYPE, MACHINE, NAME, "mount", "access", COMMENTS, "owner", "owners",
-  "create", "lockertype", MOD1, MOD2, MOD3,
+  "machine",
+  "label", "type", "machine", "name", "mount", "access", "comments", "owner", "owners",
+  "create", "lockertype", "modtime", "modby", "modwith",
 };
 
 static struct validate gfsm_validate = {
@@ -1671,9 +1616,9 @@ static struct validate gfsm_validate = {
 };
 
 static char *gfsn_fields[] = {
-  MACHINE, "parition",
-  LABEL, TYPE, MACHINE, NAME, "mount", "access", COMMENTS, "owner", "owners",
-  "create", "lockertype", MOD1, MOD2, MOD3,
+  "machine", "parition",
+  "label", "type", "machine", "name", "mount", "access", "comments", "owner", "owners",
+  "create", "lockertype", "modtime", "modby", "modwith",
 };
 
 static struct validate gfsn_validate = {
@@ -1690,14 +1635,14 @@ static struct validate gfsn_validate = {
 
 static char *gfsp_fields[] = {
   "path",
-  LABEL, TYPE, MACHINE, NAME, "mount", "access", COMMENTS, "owner", "owners",
-  "create", "lockertype", MOD1, MOD2, MOD3,
+  "label", "type", "machine", "name", "mount", "access", "comments", "owner", "owners",
+  "create", "lockertype", "modtime", "modby", "modwith",
 };
 
 static char *gfsg_fields[] = {
-  LIST,
-  LABEL, TYPE, MACHINE, NAME, "mount", "access", COMMENTS, "owner", "owners",
-  "create", "lockertype", MOD1, MOD2, MOD3,
+  "list",
+  "label", "type", "machine", "name", "mount", "access", "comments", "owner", "owners",
+  "create", "lockertype", "modtime", "modby", "modwith",
 };
 
 static struct validate gfsg_validate = {
@@ -1713,20 +1658,20 @@ static struct validate gfsg_validate = {
 };
 
 static char *afil_fields[] = {
-  LABEL, TYPE, MACHINE, NAME, "mount", "access", COMMENTS, "owner", "owners",
+  "label", "type", "machine", "name", "mount", "access", "comments", "owner", "owners",
   "create", "lockertype",
 };
 
 static struct valobj afil_valobj[] = {
-  {V_CHAR, 0, FILESYS_TABLE, LABEL},
+  {V_CHAR, 0, FILESYS_TABLE, "label"},
   {V_TYPE, 1, 0, "filesys", 0, MR_FSTYPE},
-  {V_ID, 2, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
-  {V_CHAR, 3, FILESYS_TABLE, NAME},
+  {V_ID, 2, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
+  {V_CHAR, 3, FILESYS_TABLE, "name"},
   {V_LEN, 4, FILESYS_TABLE, "mount"},
   {V_LEN, 5, FILESYS_TABLE, "rwaccess"},
-  {V_LEN, 6, FILESYS_TABLE, COMMENTS},
-  {V_ID, 7, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
-  {V_ID, 8, LIST_TABLE, NAME, LIST_ID, MR_LIST},
+  {V_LEN, 6, FILESYS_TABLE, "comments"},
+  {V_ID, 7, USERS_TABLE, "login", "users_id", MR_USER},
+  {V_ID, 8, LIST_TABLE, "name", "list_id", MR_LIST},
   {V_NUM, 9},
   {V_TYPE, 10, 0, "lockertype", 0, MR_TYPE},
 };
@@ -1734,31 +1679,31 @@ static struct valobj afil_valobj[] = {
 static struct validate afil_validate = {
   afil_valobj,
   11,
-  LABEL,
+  "label",
   "label = '%s'",
   1,
-  FILSYS_ID,
+  "filsys_id",
   0,
   setup_afil,
   set_filesys_modtime,
 };
 
 static char *ufil_fields[] = {
-  LABEL, "newlabel", TYPE, MACHINE, NAME, "mount", "access", COMMENTS,
+  "label", "newlabel", "type", "machine", "name", "mount", "access", "comments",
   "owner", "owners", "create", "lockertype",
 };
 
 static struct valobj ufil_valobj[] = {
-  {V_ID, 0, FILESYS_TABLE, LABEL, FILSYS_ID, MR_FILESYS},
-  {V_RENAME, 1, FILESYS_TABLE, LABEL, FILSYS_ID, MR_NOT_UNIQUE},
+  {V_ID, 0, FILESYS_TABLE, "label", "filsys_id", MR_FILESYS},
+  {V_RENAME, 1, FILESYS_TABLE, "label", "filsys_id", MR_NOT_UNIQUE},
   {V_TYPE, 2, 0, "filesys", 0, MR_FSTYPE},
-  {V_ID, 3, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
-  {V_CHAR, 4, FILESYS_TABLE, NAME},
+  {V_ID, 3, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
+  {V_CHAR, 4, FILESYS_TABLE, "name"},
   {V_LEN, 5, FILESYS_TABLE, "mount"},
   {V_LEN, 6, FILESYS_TABLE, "rwaccess"},
-  {V_LEN, 7, FILESYS_TABLE, COMMENTS},
-  {V_ID, 8, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
-  {V_ID, 9, LIST_TABLE, NAME, LIST_ID, MR_LIST},
+  {V_LEN, 7, FILESYS_TABLE, "comments"},
+  {V_ID, 8, USERS_TABLE, "login", "users_id", MR_USER},
+  {V_ID, 9, LIST_TABLE, "name", "list_id", MR_LIST},
   {V_NUM, 10},
   {V_TYPE, 11, 0, "lockertype", 0, MR_TYPE},
 };
@@ -1766,17 +1711,17 @@ static struct valobj ufil_valobj[] = {
 static struct validate ufil_validate = {
   ufil_valobj,
   12,
-  LABEL,
+  "label",
   "filsys_id = %d",
   1,
-  FILSYS_ID,
+  "filsys_id",
   0,
   setup_ufil,
   set_filesys_modtime,
 };
 
 static char *dfil_fields[] = {
-  LABEL,
+  "label",
 };
 
 static struct validate dfil_validate = {
@@ -1792,7 +1737,7 @@ static struct validate dfil_validate = {
 };
 
 static char *gfgm_fields[] = {
-  "fsgroup", FILESYS, "sortkey"
+  "fsgroup", "filesys", "sortkey"
 };
 
 static struct validate gfgm_validate = {
@@ -1808,8 +1753,8 @@ static struct validate gfgm_validate = {
 };
 
 static struct valobj aftg_valobj[] = {
-  {V_ID, 0, FILESYS_TABLE, LABEL, FILSYS_ID, MR_FILESYS},
-  {V_ID, 1, FILESYS_TABLE, LABEL, FILSYS_ID, MR_FILESYS},
+  {V_ID, 0, FILESYS_TABLE, "label", "filsys_id", MR_FILESYS},
+  {V_ID, 1, FILESYS_TABLE, "label", "filsys_id", MR_FILESYS},
 };
 
 static struct validate aftg_validate = {
@@ -1825,12 +1770,12 @@ static struct validate aftg_validate = {
 };
 
 static char *ganf_fields[] = {
-  MACHINE, DIR, DEVICE, STATUS, "allocated", "size", MOD1, MOD2, MOD3,
+  "machine", "dir", "device", "status", "allocated", "size", "modtime", "modby", "modwith",
 };
 
 static char *gnfp_fields[] = {
-  MACHINE, DIR,
-  MACHINE, DIR, DEVICE, STATUS, "allocated", "size", MOD1, MOD2, MOD3,
+  "machine", "dir",
+  "machine", "dir", "device", "status", "allocated", "size", "modtime", "modby", "modwith",
 };
 
 static struct validate gnfp_validate = {
@@ -1846,7 +1791,7 @@ static struct validate gnfp_validate = {
 };
 
 static struct valobj anfp_valobj[] = {
-  {V_ID, 0, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_ID, 0, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
   {V_CHAR, 1, NFSPHYS_TABLE, "dir"},
   {V_LEN, 2, NFSPHYS_TABLE, "device"},
   {V_NUM, 3},
@@ -1857,7 +1802,7 @@ static struct valobj anfp_valobj[] = {
 static struct validate anfp_validate = {
   anfp_valobj,
   6,
-  DIR,
+  "dir",
   "mach_id = %d and dir = '%s'",
   2,
   "nfsphys_id",
@@ -1869,7 +1814,7 @@ static struct validate anfp_validate = {
 static struct validate unfp_validate = {
   anfp_valobj,
   6,
-  DIR,
+  "dir",
   "mach_id = %d and dir = '%s'",
   2,
   "nfsphys_id",
@@ -1879,11 +1824,11 @@ static struct validate unfp_validate = {
 };
 
 static char *ajnf_fields[] = {
-  MACHINE, DIR, "adjustment",
+  "machine", "dir", "adjustment",
 };
 
 static struct valobj ajnf_valobj[] = {
-  {V_ID, 0, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_ID, 0, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
   {V_CHAR, 1, NFSPHYS_TABLE, "dir"},
   {V_NUM, 2},
 };
@@ -1891,7 +1836,7 @@ static struct valobj ajnf_valobj[] = {
 static struct validate ajnf_validate = {
   ajnf_valobj,
   3,
-  DIR,
+  "dir",
   "mach_id = %d and dir = '%s'",
   2,
   "nfsphys_id",
@@ -1901,13 +1846,13 @@ static struct validate ajnf_validate = {
 };
 
 static char *dnfp_fields[] = {
-  MACHINE, DIR,
+  "machine", "dir",
 };
 
 static struct validate dnfp_validate = {
   VOmach0,
   1,
-  DIR,
+  "dir",
   "mach_id = %d and dir = '%s'",
   2,
   "nfsphys_id",
@@ -1917,12 +1862,12 @@ static struct validate dnfp_validate = {
 };
 
 static char *gqot_fields[] = {
-  FILESYS, TYPE, NAME,
-  FILESYS, TYPE, NAME, QUOTA, DIR, MACHINE, MOD1, MOD2, MOD3,
+  "filesys", "type", "name",
+  "filesys", "type", "name", "quota", "dir", "machine", "modtime", "modby", "modwith",
 };
 
 static struct valobj gqot_valobj[] = {
-  {V_TYPE, 1, 0, QUOTA_TYPE, 0, MR_TYPE},
+  {V_TYPE, 1, 0, "quota_type", 0, MR_TYPE},
   {V_TYPEDATA, 2, 0, 0, 0, MR_ACE},
 };
 
@@ -1939,8 +1884,8 @@ static struct validate gqot_validate = {
 };
 
 static char *gqbf_fields[] = {
-  FILESYS,
-  FILESYS, TYPE, NAME, QUOTA, DIR, MACHINE, MOD1, MOD2, MOD3,
+  "filesys",
+  "filesys", "type", "name", "quota", "dir", "machine", "modtime", "modby", "modwith",
 };
 
 static struct validate gqbf_validate = {
@@ -1956,12 +1901,12 @@ static struct validate gqbf_validate = {
 };
 
 static char *aqot_fields[] = {
-  FILESYS, TYPE, NAME, QUOTA,
+  "filesys", "type", "name", "quota",
 };
 
 static struct valobj aqot_valobj[] = {
-  {V_ID, 0, FILESYS_TABLE, LABEL, FILSYS_ID, MR_FILESYS},
-  {V_TYPE, 1, 0, QUOTA_TYPE, 0, MR_TYPE},
+  {V_ID, 0, FILESYS_TABLE, "label", "filsys_id", MR_FILESYS},
+  {V_TYPE, 1, 0, "quota_type", 0, MR_TYPE},
   {V_TYPEDATA, 2, 0, 0, 0, MR_ACE},
   {V_NUM, 3},
 };
@@ -1969,7 +1914,7 @@ static struct valobj aqot_valobj[] = {
 static struct validate aqot_validate = {
   aqot_valobj,
   4,
-  FILSYS_ID,
+  "filsys_id",
   "filsys_id = %d and type = '%s' and entity_id = %d",
   3,
   0,
@@ -1981,7 +1926,7 @@ static struct validate aqot_validate = {
 static struct validate uqot_validate = {
   aqot_valobj,
   4,
-  FILSYS_ID,
+  "filsys_id",
   "filsys_id = %d AND type = '%s' AND entity_id = %d",
   3,
   0,
@@ -1993,7 +1938,7 @@ static struct validate uqot_validate = {
 static struct validate dqot_validate = {
   aqot_valobj,
   3,
-  FILSYS_ID,
+  "filsys_id",
   "filsys_id = %d AND type = '%s' AND entity_id = %d",
   3,
   0,
@@ -2003,8 +1948,8 @@ static struct validate dqot_validate = {
 };
 
 static char *gnfq_fields[] = {
-  FILESYS, LOGIN,
-  FILESYS, LOGIN, QUOTA, DIR, MACHINE, MOD1, MOD2, MOD3,
+  "filesys", "login",
+  "filesys", "login", "quota", "dir", "machine", "modtime", "modby", "modwith",
 };
 
 static struct validate gnfq_validate = {
@@ -2020,24 +1965,24 @@ static struct validate gnfq_validate = {
 };
 
 static char *gnqp_fields[] = {
-  MACHINE, DIR,
-  FILESYS, LOGIN, QUOTA, DIR, MACHINE, MOD1, MOD2, MOD3,
+  "machine", "dir",
+  "filesys", "login", "quota", "dir", "machine", "modtime", "modby", "modwith",
 };
 
 static char *anfq_fields[] = {
-  FILESYS, LOGIN, QUOTA,
+  "filesys", "login", "quota",
 };
 
 static struct valobj anfq_valobj[] = {
-  {V_ID, 0, FILESYS_TABLE, LABEL, FILSYS_ID, MR_FILESYS},
-  {V_ID, 1, USERS_TABLE, LOGIN, USERS_ID, MR_USER},
+  {V_ID, 0, FILESYS_TABLE, "label", "filsys_id", MR_FILESYS},
+  {V_ID, 1, USERS_TABLE, "login", "users_id", MR_USER},
   {V_NUM, 2},
 };
 
 static struct validate anfq_validate = {
   anfq_valobj,
   3,
-  FILSYS_ID,
+  "filsys_id",
   "filsys_id = %d AND type = 'USER' AND entity_id = %d",
   2,
   0, /* object ? */
@@ -2049,7 +1994,7 @@ static struct validate anfq_validate = {
 static struct validate unfq_validate = {
   anfq_valobj,
   3,
-  FILSYS_ID,
+  "filsys_id",
   "filsys_id = %d AND type = 'USER' AND entity_id = %d",
   2,
   0,
@@ -2061,7 +2006,7 @@ static struct validate unfq_validate = {
 static struct validate dnfq_validate = {
   anfq_valobj,
   2,
-  FILSYS_ID,
+  "filsys_id",
   "filsys_id = %d AND entity_id = %d",
   2,
   0,
@@ -2071,9 +2016,9 @@ static struct validate dnfq_validate = {
 };
 
 static char *gzcl_fields[] = {
-  CLASS,
-  CLASS, "xmt_type", "xmt_name", "sub_type", "sub_name",
-  "iws_type", "iws_name", "iui_type", "iui_name", MOD1, MOD2, MOD3, 
+  "class",
+  "class", "xmt_type", "xmt_name", "sub_type", "sub_name",
+  "iws_type", "iws_name", "iui_type", "iui_name", "modtime", "modby", "modwith", 
 };
 
 static struct validate gzcl_validate = {
@@ -2089,26 +2034,26 @@ static struct validate gzcl_validate = {
 };
 
 static char *azcl_fields[] = {
-  CLASS, "xmt_type", "xmt_name", "sub_type", "sub_name",
+  "class", "xmt_type", "xmt_name", "sub_type", "sub_name",
   "iws_type", "iws_name", "iui_type", "iui_name",
 };
 
 static struct valobj azcl_valobj[] = {
-  {V_CHAR, 0, ZEPHYR_TABLE, CLASS},
-  {V_TYPE, 1, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 2, 0, 0, LIST_ID, MR_ACE},
-  {V_TYPE, 3, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 4, 0, 0, LIST_ID, MR_ACE},
-  {V_TYPE, 5, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 6, 0, 0, LIST_ID, MR_ACE},
-  {V_TYPE, 7, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 8, 0, 0, LIST_ID, MR_ACE},
+  {V_CHAR, 0, ZEPHYR_TABLE, "class"},
+  {V_TYPE, 1, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 2, 0, 0, "list_id", MR_ACE},
+  {V_TYPE, 3, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 4, 0, 0, "list_id", MR_ACE},
+  {V_TYPE, 5, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 6, 0, 0, "list_id", MR_ACE},
+  {V_TYPE, 7, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 8, 0, 0, "list_id", MR_ACE},
 };
 
 static struct validate azcl_validate = {
   azcl_valobj,
   9,
-  CLASS,
+  "class",
   "class = '%s'",
   1,
   0,
@@ -2118,26 +2063,26 @@ static struct validate azcl_validate = {
 };
 
 static char *uzcl_fields[] = {
-  CLASS, "newclass", "xmt_type", "xmt_name", "sub_type", "sub_name",
+  "class", "newclass", "xmt_type", "xmt_name", "sub_type", "sub_name",
   "iws_type", "iws_name", "iui_type", "iui_name",
 };
 
 static struct valobj uzcl_valobj[] = {
-  {V_RENAME, 1, ZEPHYR_TABLE, CLASS, 0, MR_NOT_UNIQUE},
-  {V_TYPE, 2, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 3, 0, 0, LIST_ID, MR_ACE},
-  {V_TYPE, 4, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 5, 0, 0, LIST_ID, MR_ACE},
-  {V_TYPE, 6, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 7, 0, 0, LIST_ID, MR_ACE},
-  {V_TYPE, 8, 0, ACE_TYPE, 0, MR_ACE},
-  {V_TYPEDATA, 9, 0, 0, LIST_ID, MR_ACE},
+  {V_RENAME, 1, ZEPHYR_TABLE, "class", 0, MR_NOT_UNIQUE},
+  {V_TYPE, 2, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 3, 0, 0, "list_id", MR_ACE},
+  {V_TYPE, 4, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 5, 0, 0, "list_id", MR_ACE},
+  {V_TYPE, 6, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 7, 0, 0, "list_id", MR_ACE},
+  {V_TYPE, 8, 0, "ace_type", 0, MR_ACE},
+  {V_TYPEDATA, 9, 0, 0, "list_id", MR_ACE},
 };
 
 static struct validate uzcl_validate = {
   uzcl_valobj,
   9,
-  CLASS,
+  "class",
   "class = '%s'",
   1,
   0,
@@ -2149,7 +2094,7 @@ static struct validate uzcl_validate = {
 static struct validate dzcl_validate = {
   0,
   0,
-  CLASS,
+  "class",
   "class = '%s'",
   1,
   0,
@@ -2159,8 +2104,8 @@ static struct validate dzcl_validate = {
 };
 
 static char *gsha_fields[] = {
-  MACHINE,
-  MACHINE, ACE_TYPE, ACE_NAME, MOD1, MOD2, MOD3,
+  "machine",
+  "machine", "ace_type", "ace_name", "modtime", "modby", "modwith",
 };
 
 static struct validate gsha_validate =	
@@ -2177,12 +2122,12 @@ static struct validate gsha_validate =
 };
 
 static char *asha_fields[] = {
-  MACHINE, ACE_TYPE, ACE_NAME,
+  "machine", "ace_type", "ace_name",
 };
 
 static struct valobj asha_valobj[] = {
-  {V_ID, 0, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
-  {V_TYPE, 1, 0, ACE_TYPE, 0, MR_ACE},
+  {V_ID, 0, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
+  {V_TYPE, 1, 0, "ace_type", 0, MR_ACE},
   {V_TYPEDATA, 2, 0, 0, 0, MR_ACE},
 };
 
@@ -2190,35 +2135,35 @@ static struct validate asha_validate =
 {
   asha_valobj,
   3,
-  MACH_ID,
+  "mach_id",
   "mach_id = %d",
   1,
-  MACH_ID,
+  "mach_id",
   0,
   0,
   set_modtime_by_id,
 };
 
 static char *gsvc_fields[] = {
-  SERVICE,
-  SERVICE, "protocol", "port", DESC, MOD1, MOD2, MOD3,
+  "service",
+  "service", "protocol", "port", "description", "modtime", "modby", "modwith",
 };
 
 static char *asvc_fields[] = {
-  SERVICE, "protocol", "port", DESC,
+  "service", "protocol", "port", "description",
 };
 
 static struct valobj asvc_valobj[] = {
-  {V_CHAR, 0, SERVICES_TABLE, NAME},
+  {V_CHAR, 0, SERVICES_TABLE, "name"},
   {V_CHAR, 1, SERVICES_TABLE, "protocol"},
   {V_NUM, 2},
-  {V_CHAR, 3, SERVICES_TABLE, DESC},
+  {V_CHAR, 3, SERVICES_TABLE, "description"},
 };
 
 static struct validate asvc_validate = {
   asvc_valobj,
   4,
-  NAME,
+  "name",
   "name = '%s'",
   1,
   0,
@@ -2230,8 +2175,8 @@ static struct validate asvc_validate = {
 static char *gpce_fields[] = {
   "printer",
   "printer", "spooling_host", "spool_directory", "rprinter",
-  "quotaserver", "authenticate", "price", COMMENTS,
-  MOD1, MOD2, MOD3,
+  "quotaserver", "authenticate", "price", "comments",
+  "modtime", "modby", "modwith",
 };
 
 static struct validate gpce_validate = {
@@ -2248,16 +2193,16 @@ static struct validate gpce_validate = {
 
 static char *apce_fields[] = {
   "printer", "spooling_host", "spool_directory", "rprinter",
-  "quotaserver", "authenticate", "price", COMMENTS,
-  MOD1, MOD2, MOD3,
+  "quotaserver", "authenticate", "price", "comments",
+  "modtime", "modby", "modwith",
 };
 
 static struct valobj apce_valobj[] = {
-  {V_CHAR, 0, PRINTCAP_TABLE, NAME},
-  {V_ID, 1, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_CHAR, 0, PRINTCAP_TABLE, "name"},
+  {V_ID, 1, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
   {V_LEN, 2, PRINTCAP_TABLE, "dir"},
   {V_LEN, 3, PRINTCAP_TABLE, "rp"},
-  {V_ID, 4, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_ID, 4, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
   {V_NUM, 5},
   {V_NUM, 6},
   {V_CHAR, 7, PRINTCAP_TABLE, "comments"},
@@ -2266,7 +2211,7 @@ static struct valobj apce_valobj[] = {
 static struct validate apce_validate = {
   apce_valobj,
   8,
-  NAME,
+  "name",
   "name = '%s'",
   1,
   0,
@@ -2278,7 +2223,7 @@ static struct validate apce_validate = {
 static struct validate dpce_validate = {
   0,
   0,
-  NAME,
+  "name",
   "name = '%s'",
   1,
   0,
@@ -2289,29 +2234,29 @@ static struct validate dpce_validate = {
 
 static char *gpcp_fields[] = {
   "printer",
-  "printer", "spooling_host", "spool_directory", "rprinter", COMMENTS,
-  MOD1, MOD2, MOD3,
+  "printer", "spooling_host", "spool_directory", "rprinter", "comments",
+  "modtime", "modby", "modwith",
 };
 
 static char *gpdm_fields[] = {
-  NAME,
-  NAME, "rpcnum", "host", MOD1, MOD2, MOD3,
+  "name",
+  "name", "rpcnum", "host", "modtime", "modby", "modwith",
 };
 
 static char *apdm_fields[] = {
-  NAME, "rpcnum", "host"
+  "name", "rpcnum", "host"
 };
 
 static struct valobj apdm_valobj[] = {
-  {V_CHAR, 0, PALLADIUM_TABLE, NAME},
+  {V_CHAR, 0, PALLADIUM_TABLE, "name"},
   {V_NUM, 1},
-  {V_ID, 2, MACHINE_TABLE, NAME, MACH_ID, MR_MACHINE},
+  {V_ID, 2, MACHINE_TABLE, "name", "mach_id", MR_MACHINE},
 };
 
 static struct validate apdm_validate = {
   apdm_valobj,
   3,
-  NAME,
+  "name",
   "name = '%s'",
   1,
   0,
@@ -2323,7 +2268,7 @@ static struct validate apdm_validate = {
 static struct validate dpdm_validate = {
   0,
   0,
-  NAME,
+  "name",
   "name = '%s'",
   1,
   0,
@@ -2333,17 +2278,17 @@ static struct validate dpdm_validate = {
 };
 
 static char *gali_fields[] = {
-  NAME, TYPE, "trans",
-  NAME, TYPE, "trans",
+  "name", "type", "trans",
+  "name", "type", "trans",
 };
 
 static char *aali_fields[] = {
-  NAME, TYPE, "trans",
+  "name", "type", "trans",
 };
 
 static struct valobj aali_valobj[] = {
-  {V_CHAR, 0, ALIAS_TABLE, NAME},
-  {V_TYPE, 1, 0, ALIAS, 0, MR_TYPE},
+  {V_CHAR, 0, ALIAS_TABLE, "name"},
+  {V_TYPE, 1, 0, "alias", 0, MR_TYPE},
   {V_CHAR, 2, ALIAS_TABLE, "trans"},
 };
 
@@ -2373,11 +2318,11 @@ static struct validate dali_validate =	/* DELETE_ALIAS */
 };
 
 static char *gval_fields[] = {
-  NAME, "value",
+  "name", "value",
 };
 
 static struct valobj gval_valobj[] = {
-  {V_NAME, 0, NUMVALUES_TABLE, NAME, 0, MR_NO_MATCH},
+  {V_NAME, 0, NUMVALUES_TABLE, "name", 0, MR_NO_MATCH},
 };
 
 static struct validate gval_validate = {
@@ -2393,11 +2338,11 @@ static struct validate gval_validate = {
 };
 
 static char *aval_fields[] = {
-  NAME, "value",
+  "name", "value",
 };
 
 static struct valobj aval_valobj[] = {
-  {V_CHAR, 0, NUMVALUES_TABLE, NAME},
+  {V_CHAR, 0, NUMVALUES_TABLE, "name"},
   {V_NUM, 1},
 };
 
@@ -2405,7 +2350,7 @@ static struct validate aval_validate =	/* for aval, uval, and dval */
 {
   aval_valobj,
   2,
-  NAME,
+  "name",
   "name = '%s'",
   1,
   0,
@@ -2415,11 +2360,11 @@ static struct validate aval_validate =	/* for aval, uval, and dval */
 };
 
 static char *dval_fields[] = {
-  NAME,
+  "name",
 };
 
 static char *gats_fields[] = {
-  "table_name", "appends", "updates", "deletes", MOD1, MOD2, MOD3,
+  "table_name", "appends", "updates", "deletes", "modtime", "modby", "modwith",
 };
 
 static char *_sdl_fields[] = {
