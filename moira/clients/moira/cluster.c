@@ -1,4 +1,4 @@
-/* $Id: cluster.c,v 1.51.2.1 2001-08-21 04:42:09 zacheiss Exp $
+/* $Id: cluster.c,v 1.51.2.2 2001-08-21 07:19:12 zacheiss Exp $
  *
  *	This is the file cluster.c for the Moira Client, which allows users
  *      to quickly and easily maintain most parts of the Moira database.
@@ -142,7 +142,7 @@ static char **SetMachineDefaults(char **info, char *name)
   info[M_OWNER_NAME] = strdup("NONE");
   info[M_ACOMMENT] = strdup("");
   info[M_OCOMMENT] = strdup("");
-  info[16] = info[17] = NULL;
+  info[17] = info[18] = NULL;
   return info;
 }
 
