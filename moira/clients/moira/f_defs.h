@@ -1,4 +1,4 @@
-/* $Id: f_defs.h,v 1.34 2001-05-31 21:34:34 zacheiss Exp $
+/* $Id: f_defs.h,v 1.34.2.1 2001-08-22 08:37:58 zacheiss Exp $
  *
  *	This is the file f_defs.h for the Moira Client, which allows users
  *      to quickly and easily maintain most parts of the Moira database.
@@ -47,6 +47,7 @@ int AttachHelp(void);
 int ShowMachineInfo(int argc, char **argv);
 int ShowMachineQuery(int argc, char **argv);
 int MachineByOwner(int argc, char **argv);
+int MachineByAcctNumber(int argc, char **argv);
 int AddMachine(int argc, char **argv);
 int UpdateMachine(int argc, char **argv);
 int DeleteMachine(int argc, char **argv);

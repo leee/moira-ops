@@ -1,4 +1,4 @@
-/* $Id: menus.c,v 1.44 2001-05-31 21:34:34 zacheiss Exp $
+/* $Id: menus.c,v 1.44.2.1 2001-08-22 08:37:59 zacheiss Exp $
  *
  *	This is the file menus.c for the Moira Client, which allows users
  *      to quickly and easily maintain most parts of the Moira database.
@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 
-RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/clients/moira/menus.c,v 1.44 2001-05-31 21:34:34 zacheiss Exp $");
+RCSID("$Header: /afs/.athena.mit.edu/astaff/project/moiradev/repository/moira/clients/moira/menus.c,v 1.44.2.1 2001-08-22 08:37:59 zacheiss Exp $");
 
 /* ------------------------- Second Tier Menus ------------------------- */
 
@@ -510,7 +510,7 @@ Menu machine_menu = {
   NULLFUNC,
   NULLFUNC,
   "Machine Menu",
-  8,
+  9,
   {
     { ShowMachineInfo, NULLMENU, 2, {
       {"show", "Get machine information"},
@@ -524,6 +524,8 @@ Menu machine_menu = {
       {"network", "Network (or leave empty to match any): "}
     } },
     SIMPLEFUNC("owner", "Lookup machines by owner", MachineByOwner),
+    SIMPLEFUNC("acctnumber", "Lookup machines by account number",
+	       MachineByAcctNumber),
     { AddMachine, NULLMENU, 2, {
       {"add", "Add a new machine"},
       {"network", "Network assignment: "},

@@ -1,4 +1,4 @@
-/* $Id: cluster.c,v 1.51.2.3 2001-08-22 08:08:12 zacheiss Exp $
+/* $Id: cluster.c,v 1.51.2.4 2001-08-22 08:37:58 zacheiss Exp $
  *
  *	This is the file cluster.c for the Moira Client, which allows users
  *      to quickly and easily maintain most parts of the Moira database.
@@ -2072,6 +2072,28 @@ struct mqelem *GetMachineByOwner(char *type, char *name)
       return NULL;
     }
   return QueueTop(elem);
+}
+
+int MachineByAcctNumber(int argc, char **argv)
+{
+  char *args[0], *account_number;
+  int status;
+  struct mqelem *elem = NULL;
+
+  if (GetValueFromUser("Account Number", &account_number) == SUB_ERROR)
+    return DM_NORMAL;
+
+  args[0] = account_number;
+  if (status = do_mr_query("get_host_by_account_number", 1, args, StoreInfo, 
+			   &elem))
+    {
+      com_err(program_name, status, " in get_host_by_account_number");
+      return DM_NORMAL;
+    }
+  Loop(QueueTop(elem), (void (*)(char **)) PrintMachInfo);
+  FreeQueue(elem);
+
+  return DM_NORMAL;
 }
 
 int ShowContainerInfo(int argc, char **argv)
